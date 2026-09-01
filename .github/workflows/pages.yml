@@ -36,7 +36,7 @@ jobs:
         run: |
           test -f registry/v1/latest.json
           snapshot_url=$(node -p "JSON.parse(require('fs').readFileSync('registry/v1/latest.json','utf8')).snapshot.url")
-          relative=${snapshot_url#*EchoChannelHub/registry/}
+          relative=${snapshot_url#*EchoChannelHub/}
           test -f "registry/$relative"
       - id: deployment
         uses: actions/deploy-pages@v4
