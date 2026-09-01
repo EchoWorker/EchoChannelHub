@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/EchoWorker/EchoChannelHub/main/schemas/candidate-v1.schema.json",
+  "title": "Local TEST ONLY candidate sidecar",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "artifact", "target", "sha256", "size", "signature", "keyId", "testOnly"],
+  "properties": {
+    "schemaVersion": {"const": 1}, "artifact": {"type": "string", "pattern": "\\.echochannel$"}, "target": {"const": "windows-x64"},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "size": {"type": "integer", "minimum": 1}, "signature": {"type": "string", "minLength": 1},
+    "keyId": {"const": "echoworker-test-2026"}, "testOnly": {"const": true}
+  }
+}

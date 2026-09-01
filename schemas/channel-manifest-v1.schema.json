@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/EchoWorker/EchoChannelHub/main/schemas/channel-manifest-v1.schema.json",
+  "title": "EchoWork channel_manager artifact manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "publisher", "id", "version", "target", "entrypoint", "protocols"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "publisher": {"type": "string", "minLength": 1},
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"},
+    "target": {"const": "windows-x64"},
+    "entrypoint": {"type": "string", "pattern": "^[^/\\\\]+(?:[/\\\\][^/\\\\]+)*$"},
+    "protocols": {
+      "type": "object", "additionalProperties": false, "required": ["setup", "start"],
+      "properties": {"setup": {"const": 1}, "start": {"const": 1}}
+    }
+  }
+}

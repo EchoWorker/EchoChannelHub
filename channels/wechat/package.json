@@ -1,0 +1,67 @@
+{
+  "name": "@echoworker/echo-wechat",
+  "version": "0.1.4",
+  "description": "WeChat channel for EchoAI — talk to your EchoAI agent from WeChat (text + media).",
+  "type": "module",
+  "ilink_appid": "bot",
+  "ilink_client_version": "2.4.4",
+  "_comment_ilink": "ilink_appid + ilink_client_version are read by src/protocol/api/api.ts to build the iLink protocol headers; keep aligned with the vendored upstream @tencent-weixin/openclaw-weixin.",
+  "bin": {
+    "echo-wechat": "dist/cli.js"
+  },
+  "main": "dist/cli.js",
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.js.map",
+    "!dist/**/*.test.js",
+    "!dist/**/*.test.js.map",
+    "README.md",
+    "NOTICE.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "login": "node dist/cli.js login",
+    "start": "node dist/cli.js start",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"dist/**/*.test.js\"",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "echoai",
+    "wechat",
+    "weixin",
+    "channel",
+    "chatbot",
+    "agent",
+    "ilink"
+  ],
+  "author": "EchoWorker",
+  "license": "MIT",
+  "homepage": "https://github.com/EchoWorker/EchoAIExtensions/tree/main/Channels/wechat#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EchoWorker/EchoAIExtensions.git",
+    "directory": "Channels/wechat"
+  },
+  "bugs": {
+    "url": "https://github.com/EchoWorker/EchoAIExtensions/issues"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "0.12.0",
+    "silk-wasm": "^3.6.1",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/qrcode": "^1.5.6",
+    "@types/qrcode-terminal": "^0.12.2",
+    "@types/ws": "^8.5.12",
+    "typescript": "^5.6.0"
+  }
+}

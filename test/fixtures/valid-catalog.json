@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "channels": [
+    {
+      "schemaVersion": 1,
+      "id": "fixture-channel",
+      "name": "Fixture Channel",
+      "version": "1.0.0",
+      "description": "Valid test fixture.",
+      "license": "MIT",
+      "runtime": "node",
+      "entrypoint": "dist/cli.js",
+      "platforms": ["win32-x64"],
+      "capabilities": ["text"],
+      "provenance": "MIGRATION.json"
+    }
+  ]
+}

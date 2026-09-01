@@ -1,0 +1,27 @@
+name: candidate
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows-x64:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: node src/hubctl.js package wechat --target windows-x64 --bundle-runtime
+      - run: node src/hubctl.js verify artifacts/wechat-0.1.4-windows-x64.echochannel
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wechat-0.1.4-windows-x64-TEST-ONLY-candidate
+          path: |
+            artifacts/wechat-0.1.4-windows-x64.echochannel
+            artifacts/wechat-0.1.4-windows-x64.echochannel.json
+            registry/v1/catalog.json
+            registry/v1/catalog.json.sig
+            test/keys/TEST_ONLY_ed25519_public.json
+          if-no-files-found: error

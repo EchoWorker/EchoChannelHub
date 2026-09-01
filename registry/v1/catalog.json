@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sequence": 2,
+  "generatedAt": "2026-09-01T10:16:00.012Z",
+  "expiresAt": "2026-10-01T10:16:00.012Z",
+  "channels": [
+    {
+      "publisher": "EchoWorker",
+      "id": "wechat",
+      "name": "Echo WeChat",
+      "summary": "WeChat channel for EchoAI with text and media support.",
+      "releases": [
+        {
+          "version": "0.1.4",
+          "status": "active",
+          "artifacts": {
+            "windows-x64": {
+              "url": "https://github.com/EchoWorker/EchoChannelHub/releases/download/test-candidate/wechat-0.1.4-windows-x64.echochannel",
+              "size": 35518203,
+              "sha256": "5e6d50c2d580f8b0c24f2492a0c510383fe7c2ec41884da37a9fb00a9b96f997",
+              "signature": "QPoZqgVh06F/jkDzNvW9kGaAUsFp7NWNmOM5zgUZeufs1ZY1MNPHvdBlOGWgVtFKr2TmBBIUpy7oOpoEbgVJBg==",
+              "keyId": "echoworker-test-2026"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@echoworker/channel-hub",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "channels/*"
+  ],
+  "bin": {
+    "hubctl": "src/hubctl.js"
+  },
+  "scripts": {
+    "hubctl": "node src/hubctl.js",
+    "validate": "node src/hubctl.js validate",
+    "build-catalog": "node src/hubctl.js build-catalog --check",
+    "check": "npm run validate && npm run build-catalog",
+    "test": "node --test test/*.test.js"
+  },
+  "devDependencies": {
+    "yauzl": "^3.4.0",
+    "yazl": "^3.3.1"
+  }
+}

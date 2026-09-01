@@ -1,0 +1,6 @@
+{
+  "warning": "TEST ONLY - NON-PRODUCTION KEY. Built into EchoWork test/development builds only.",
+  "keyId": "echoworker-test-2026",
+  "algorithm": "Ed25519",
+  "publicKeyBase64": "xvUBfE3k8F1yfyGn+WqaJuuRA40hlsAA1iidEf7vgnE="
+}

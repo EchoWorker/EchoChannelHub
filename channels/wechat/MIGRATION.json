@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "migratedAt": "2026-04-13",
+  "source": {
+    "repository": "https://github.com/EchoWorker/EchoAIExtensions.git",
+    "path": "Channels/wechat",
+    "ref": "working-tree",
+    "includedUncommittedChanges": true
+  },
+  "destination": "channels/wechat",
+  "excluded": [".git", "node_modules", "dist"],
+  "note": "Initial Registry M1 import; source working-tree changes were intentionally preserved."
+}

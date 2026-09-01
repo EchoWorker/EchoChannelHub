@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "publisher": "EchoWorker",
+  "id": "wechat",
+  "name": "Echo WeChat",
+  "version": "0.1.4",
+  "summary": "WeChat channel for EchoAI with text and media support.",
+  "license": "MIT",
+  "runtime": "node",
+  "entrypoint": "dist/cli.js",
+  "target": "windows-x64",
+  "capabilities": ["text", "image", "audio", "setup"],
+  "provenance": "MIGRATION.json"
+}
