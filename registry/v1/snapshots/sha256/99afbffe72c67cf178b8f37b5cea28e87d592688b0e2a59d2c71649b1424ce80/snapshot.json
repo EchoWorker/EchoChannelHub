@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "sequence": 2,
-  "generatedAt": "2026-09-01T12:29:38.869Z",
-  "expiresAt": "2026-10-01T12:29:38.869Z",
+  "sequence": 3,
+  "generatedAt": "2026-09-01T12:33:32.435Z",
+  "expiresAt": "2026-10-01T12:33:32.435Z",
   "keyId": "echoworker-test-2026",
   "testOnly": true,
   "blobs": {
     "catalog": {
-      "sha256": "863e4991f4caa0b6a4f85d4a9381eae54581e0a3347e1fc36a8072f3ec3e22fb",
-      "url": "https://echoworker.github.io/EchoChannelHub/v1/objects/sha256/863e4991f4caa0b6a4f85d4a9381eae54581e0a3347e1fc36a8072f3ec3e22fb/catalog.json",
-      "size": 2168
+      "sha256": "380ac8734586972c65efe7644f6768684db09d4d3f1d42e0739ec46ba36b8945",
+      "url": "https://echoworker.github.io/EchoChannelHub/v1/objects/sha256/380ac8734586972c65efe7644f6768684db09d4d3f1d42e0739ec46ba36b8945/catalog.json",
+      "size": 2152
     },
     "categories": {
       "sha256": "03abb0ff8e009867e25c3236c0d3dac66e2d4edc9718212942d3cba1ef6e6a87",
@@ -23,7 +23,7 @@
     }
   },
   "changedSet": {
-    "base": "dacc1c38c8448021b44584eb14ad51e502b1ae36c2d3ecc0d4f442e48e54ee2a",
+    "base": "8844fdc4db28cce32fc6bd6c748d558b200e5495dccc23bf699e5dfb726bd608",
     "channels": [
       "wechat"
     ],
