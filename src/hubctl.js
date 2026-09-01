@@ -50,8 +50,10 @@ export async function main(args = process.argv.slice(2)) {
     const channel = loadChannels(root).find(c => c.manifest.id === subject); if (!channel) return fail(`unknown channel: ${subject}`, 2);
     const target = option(args, "--target") ?? TARGET; if (target !== TARGET || channel.manifest.target !== TARGET) return fail(`unsupported or undeclared target: ${target}`, 2);
     if (process.platform !== "win32" || process.arch !== "x64") return fail(`${TARGET} candidates must be built on Windows x64`);
-    run("npm", ["ci"], channel.dir); run("npm", ["run", "build"], channel.dir); run("npm", ["test"], channel.dir);
-    const artifactDir = path.join(root, "artifacts"); const stage = path.join(artifactDir, `.stage-${subject}`); fs.rmSync(stage, { recursive: true, force: true }); fs.mkdirSync(path.join(stage, "payload", "app"), { recursive: true });
+    run("npm", ["run", "build"], channel.dir); run("npm", ["test"], channel.dir);
+    const artifactDir = path.join(root, "artifacts");
+    const stage = fs.mkdtempSync(path.join(os.tmpdir(), `echochannel-${subject}-`));
+    fs.mkdirSync(path.join(stage, "payload", "app"), { recursive: true });
     copyFiltered(channel.dir, path.join(stage, "payload", "app")); fs.cpSync(path.join(channel.dir, "dist"), path.join(stage, "payload", "app", "dist"), { recursive: true }); run("npm", ["ci", "--omit=dev", "--ignore-scripts"], path.join(stage, "payload", "app"));
     const bundled = args.includes("--bundle-runtime"); if (bundled) { fs.mkdirSync(path.join(stage, "payload", "runtime")); fs.copyFileSync(process.execPath, path.join(stage, "payload", "runtime", "node.exe")); }
     fs.writeFileSync(path.join(stage, "payload", "echo-wechat.cmd"), bundled ? "@echo off\r\n\"%~dp0runtime\\node.exe\" \"%~dp0app\\dist\\cli.js\" %*\r\n" : "@echo off\r\nnode \"%~dp0app\\dist\\cli.js\" %*\r\n");

@@ -24,7 +24,7 @@
     "login": "node dist/cli.js login",
     "start": "node dist/cli.js start",
     "typecheck": "tsc --noEmit",
-    "test": "node --test \"dist/**/*.test.js\"",
+    "test": "node --test dist/api-send.test.js dist/gateway-client.test.js dist/gateway-lock.test.js dist/outbound-queue.test.js dist/protocol/auth/accounts.test.js dist/protocol/media/image-sniff.test.js dist/setup/loopback-server.test.js",
     "prepare": "npm run build",
     "prepublishOnly": "npm run build"
   },
