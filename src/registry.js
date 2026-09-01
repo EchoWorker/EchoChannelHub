@@ -4,7 +4,7 @@ import { TARGET, makeCatalog, sha256Bytes, stableJson, sign, verifySignature, va
 
 const objectRef = (bytes, name, baseUrl) => ({ sha256: sha256Bytes(bytes), url: `${baseUrl}/objects/sha256/${sha256Bytes(bytes)}/${name}` });
 const writeSigned = (file, bytes, signer = sign) => { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, bytes); fs.writeFileSync(`${file}.sig`, `${signer(bytes)}\n`); };
-export function buildRegistry({ channels, artifacts, output, prior, now = new Date(), baseUrl = "https://echoworker.github.io/EchoChannelHub/registry/v1", signer = sign, testOnly = true }) {
+export function buildRegistry({ channels, artifacts, output, prior, now = new Date(), baseUrl = "https://echoworker.github.io/EchoChannelHub/v1", signer = sign, testOnly = true }) {
   const generatedAt = now.toISOString(), expiresAt = new Date(now.getTime() + 30 * 86400000).toISOString(), sequence = (prior?.snapshot?.sequence ?? 0) + 1;
   const documents = {
     "catalog.json": makeCatalog(channels, artifacts, { sequence, generatedAt, expiresAt }),
