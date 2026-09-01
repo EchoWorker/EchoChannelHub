@@ -15,7 +15,7 @@ test("generated root manifest exactly matches EchoWork model", () => {
 test("repository bilingual semantic metadata validates", () => {
   assert.deepEqual(validateRepository(root), []);
   const m = channels[0].manifest;
-  assert.ok(m.description.en && m.description["zh-CN"] && m.details.en && m.details["zh-CN"]);
+  assert.ok(m.summary.en && m.summary["zh-CN"] && m.description.en && m.description["zh-CN"]);
 });
 test("incremental changed-set reports only semantic changes", () => {
   const artifacts = { wechat: { url:"https://example.test/a", size:1, sha256:"0".repeat(64), signature:"x", keyId:"test" } };

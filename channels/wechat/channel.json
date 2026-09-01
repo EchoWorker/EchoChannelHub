@@ -3,27 +3,27 @@
   "schemaVersion": 1,
   "publisher": "EchoWorker",
   "id": "wechat",
-  "name": "Echo WeChat",
+  "name": { "en": "WeChat", "zh-CN": "微信" },
   "version": "0.1.4",
+  "summary": { "en": "WeChat channel for EchoAI.", "zh-CN": "EchoAI 微信通道。" },
   "description": {
-    "en": "WeChat channel for EchoAI with text and media support.",
-    "zh-CN": "为 EchoAI 提供文本和媒体支持的微信通道。"
-  },
-  "details": {
     "en": "Connect EchoAI to WeChat through guided QR-code setup and exchange text, images, and audio.",
     "zh-CN": "通过二维码引导配置将 EchoAI 连接到微信，并收发文本、图片和音频。"
   },
-  "category": "messaging",
-  "tags": ["social", "wechat"],
+  "aliases": ["wechat", "wx"],
+  "categoryIds": ["messaging"],
+  "tagIds": ["direct-message", "media", "multi-account"],
   "license": "MIT",
   "runtime": "node",
+  "runtimeLabel": { "en": "Bundled Node.js runtime", "zh-CN": "内置 Node.js 运行时" },
   "entrypoint": "dist/cli.js",
   "target": "windows-x64",
-  "capabilities": ["audio", "image", "setup", "text"],
-  "trust": {
-    "level": "verified",
-    "source": "EchoWorker repository review",
-    "reviewedAt": "2026-09-01T00:00:00Z"
-  },
+  "capabilities": ["media", "receive", "send"],
+  "highlights": [
+    { "en": "Guided QR-code setup", "zh-CN": "二维码引导配置" },
+    { "en": "Text, image, and audio messaging", "zh-CN": "文本、图片和音频消息" }
+  ],
+  "publisherTrust": "official",
+  "setupMethod": { "en": "Guided setup window", "zh-CN": "引导式配置窗口" },
   "provenance": "MIGRATION.json"
 }

@@ -49,11 +49,11 @@ export function validateRepository(base = root) {
   const ids = new Set();
   for (const channel of channels) {
     const m = channel.manifest, at = m.id ?? channel.directoryName;
-    const allowed = new Set(["$schema", "schemaVersion", "publisher", "id", "name", "version", "description", "details", "category", "tags", "license", "runtime", "entrypoint", "target", "capabilities", "trust", "provenance"]);
+    const allowed = new Set(["$schema", "schemaVersion", "publisher", "id", "name", "version", "summary", "description", "aliases", "categoryIds", "tagIds", "license", "runtime", "runtimeLabel", "entrypoint", "target", "capabilities", "highlights", "publisherTrust", "setupMethod", "provenance"]);
     for (const key of Object.keys(m)) if (!allowed.has(key)) errors.push(`${channel.manifestFile}: unknown property ${key}`);
     if (m.schemaVersion !== 1 || m.publisher !== PUBLISHER || m.target !== TARGET || m.runtime !== "node") errors.push(`${at}: invalid schemaVersion, publisher, target, or runtime`);
     if (!idPattern.test(m.id ?? "") || !semver.test(m.version ?? "")) errors.push(`${channel.directoryName}: invalid id or version`);
-    for (const key of ["name", "license", "entrypoint", "provenance"]) if (typeof m[key] !== "string" || !m[key]) errors.push(`${at}.${key}: non-empty string required`);
+    for (const key of ["license", "entrypoint", "provenance"]) if (typeof m[key] !== "string" || !m[key]) errors.push(`${at}.${key}: non-empty string required`);
     validateSemantics(m, at, errors);
     if (m.id !== channel.directoryName || ids.has(m.id)) errors.push(`${channel.manifestFile}: id mismatch or duplicate`); ids.add(m.id);
     for (const file of [m.provenance, "package.json", "package-lock.json"]) if (!fs.existsSync(path.join(channel.dir, file))) errors.push(`${at}: missing ${file}`);
@@ -63,9 +63,9 @@ export function validateRepository(base = root) {
   return errors;
 }
 
-export function channelSemantic(m) { return { publisher: m.publisher, id: m.id, name: m.name, description: m.description, details: m.details, category: m.category, tags: m.tags, capabilities: m.capabilities, trust: m.trust }; }
+export function channelSemantic(m) { return { publisher: m.publisher, id: m.id, name: m.name, summary: m.summary, description: m.description, aliases: m.aliases, categoryIds: m.categoryIds, tagIds: m.tagIds, capabilities: m.capabilities, highlights: m.highlights, publisherTrust: m.publisherTrust, setupMethod: m.setupMethod, runtime: m.runtimeLabel }; }
 export function makeCatalog(channels, artifacts, { sequence = 1, generatedAt = "2026-01-01T00:00:00Z", expiresAt = "2036-01-01T00:00:00Z" } = {}) {
-  return { schemaVersion: 1, sequence, generatedAt, expiresAt, channels: channels.map(c => ({ ...channelSemantic(c.manifest), releases: [{ version: c.manifest.version, status: "active", artifacts: { [TARGET]: artifacts[c.manifest.id] } }] })) };
+  return { schemaVersion: 1, sequence, generatedAt, expiresAt, channels: channels.map(c => ({ ...channelSemantic(c.manifest), releases: [{ version: c.manifest.version, status: "active", engines: { echowork: ">=0.1.0" }, artifacts: { [TARGET]: artifacts[c.manifest.id] } }] })) };
 }
 const exact = (o, keys, at, errors) => { if (!o || typeof o !== "object" || Array.isArray(o)) { errors.push(`${at}: object required`); return false; } for (const k of Object.keys(o)) if (!keys.includes(k)) errors.push(`${at}: unknown property ${k}`); for (const k of keys) if (!(k in o)) errors.push(`${at}: missing ${k}`); return true; };
 export function validateCatalog(value, location = "catalog") {
@@ -75,11 +75,11 @@ export function validateCatalog(value, location = "catalog") {
   if (!Number.isFinite(Date.parse(value.generatedAt)) || !Number.isFinite(Date.parse(value.expiresAt)) || Date.parse(value.expiresAt) <= Date.parse(value.generatedAt)) errors.push(`${location}: invalid dates`);
   for (const [i, c] of (value.channels ?? []).entries()) {
     const at = `${location}.channels[${i}]`;
-    if (!exact(c, ["publisher", "id", "name", "description", "details", "category", "tags", "capabilities", "trust", "releases"], at, errors)) continue;
-    validateLocalized(c.description, `${at}.description`, errors); validateLocalized(c.details, `${at}.details`, errors); validateSemantics(c, at, errors);
-    if (!c.publisher || !c.id || !c.name || !Array.isArray(c.releases)) errors.push(`${at}: invalid channel`);
+    if (!exact(c, ["publisher", "id", "name", "summary", "description", "aliases", "categoryIds", "tagIds", "capabilities", "highlights", "publisherTrust", "setupMethod", "runtime", "releases"], at, errors)) continue;
+    validateSemantics(c, at, errors);
+    if (!c.publisher || !c.id || !Array.isArray(c.releases)) errors.push(`${at}: invalid channel`);
     for (const [j, r] of (c.releases ?? []).entries()) {
-      if (!exact(r, ["version", "status", "artifacts"], `${at}.releases[${j}]`, errors)) continue;
+      if (!exact(r, ["version", "status", "engines", "artifacts"], `${at}.releases[${j}]`, errors)) continue;
       if (!semver.test(r.version ?? "") || !["active", "yanked", "revoked"].includes(r.status) || !r.artifacts || Object.keys(r.artifacts).some(k => k !== TARGET)) errors.push(`${at}: invalid release`);
       for (const [target, a] of Object.entries(r.artifacts ?? {})) { if (!exact(a, ["url", "size", "sha256", "signature", "keyId"], `${at}.${target}`, errors)) continue; if (target !== TARGET || !/^https:\/\//.test(a.url) || !Number.isSafeInteger(a.size) || a.size < 0 || !/^[a-f0-9]{64}$/.test(a.sha256) || typeof a.signature !== "string" || typeof a.keyId !== "string") errors.push(`${at}.${target}: invalid artifact`); }
     }

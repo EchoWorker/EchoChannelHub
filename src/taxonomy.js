@@ -1,10 +1,20 @@
 export const locales = ["en", "zh-CN"];
 
 export const taxonomy = Object.freeze({
-  categories: Object.freeze({ messaging: { en: "Messaging", "zh-CN": "即时通讯" } }),
-  tags: Object.freeze({ wechat: { en: "WeChat", "zh-CN": "微信" }, social: { en: "Social", "zh-CN": "社交" } }),
-  capabilities: Object.freeze({ text: { en: "Text messages", "zh-CN": "文本消息" }, image: { en: "Images", "zh-CN": "图片" }, audio: { en: "Audio", "zh-CN": "音频" }, setup: { en: "Guided setup", "zh-CN": "引导式设置" } }),
-  trust: Object.freeze({ community: { en: "Community maintained", "zh-CN": "社区维护" }, verified: { en: "Publisher verified", "zh-CN": "发布者已验证" } })
+  categories: Object.freeze({
+    messaging: { order: 10, labels: { en: "Messaging", "zh-CN": "即时通讯" }, deprecated: false, replacedBy: null, aliases: [] },
+    enterprise: { order: 20, labels: { en: "Enterprise", "zh-CN": "企业" }, deprecated: false, replacedBy: null, aliases: [] },
+    automation: { order: 30, labels: { en: "Automation", "zh-CN": "自动化" }, deprecated: false, replacedBy: null, aliases: [] },
+    developer: { order: 40, labels: { en: "Developer", "zh-CN": "开发者" }, deprecated: false, replacedBy: null, aliases: [] },
+    other: { order: 1000, labels: { en: "Other", "zh-CN": "其他" }, deprecated: false, replacedBy: null, aliases: [] }
+  }),
+  tags: Object.freeze({
+    "direct-message": { group: "scenario", order: 10, labels: { en: "Direct message", "zh-CN": "私聊" }, deprecated: false, aliases: [] },
+    media: { group: "capability", order: 20, labels: { en: "Media", "zh-CN": "媒体" }, deprecated: false, aliases: [] },
+    "multi-account": { group: "capability", order: 30, labels: { en: "Multi-account", "zh-CN": "多账号" }, deprecated: false, aliases: [] }
+  }),
+  capabilities: Object.freeze({ receive: true, send: true, media: true }),
+  trust: Object.freeze({ community: true, official: true })
 });
 
 export function validateLocalized(value, at, errors) {
@@ -14,28 +24,26 @@ export function validateLocalized(value, at, errors) {
 }
 
 export function validateSemantics(manifest, at, errors) {
-  validateLocalized(manifest.description, `${at}.description`, errors);
-  validateLocalized(manifest.details, `${at}.details`, errors);
-  if (!taxonomy.categories[manifest.category]) errors.push(`${at}.category: unknown taxonomy term`);
-  for (const field of ["tags", "capabilities"]) {
+  validateLocalized(manifest.name, `${at}.name`, errors);
+  validateLocalized(manifest.summary, `${at}.summary`, errors);
+  if (!Array.isArray(manifest.categoryIds) || !manifest.categoryIds.length) errors.push(`${at}.categoryIds: non-empty array required`);
+  else for (const term of manifest.categoryIds) if (!taxonomy.categories[term]) errors.push(`${at}.categoryIds: unknown taxonomy term ${term}`);
+  for (const field of ["tagIds", "capabilities"]) {
     if (!Array.isArray(manifest[field]) || !manifest[field].length) errors.push(`${at}.${field}: non-empty array required`);
     else {
       if (new Set(manifest[field]).size !== manifest[field].length) errors.push(`${at}.${field}: duplicate terms`);
-      for (const term of manifest[field]) if (!taxonomy[field][term]) errors.push(`${at}.${field}: unknown taxonomy term ${term}`);
+      for (const term of manifest[field]) {
+        const vocabulary = field === "tagIds" ? taxonomy.tags : taxonomy[field];
+        if (!vocabulary[term]) errors.push(`${at}.${field}: unknown taxonomy term ${term}`);
+      }
     }
   }
-  if (!manifest.trust || typeof manifest.trust !== "object" || Array.isArray(manifest.trust)) errors.push(`${at}.trust: object required`);
-  else {
-    for (const key of Object.keys(manifest.trust)) if (!["level", "source", "reviewedAt"].includes(key)) errors.push(`${at}.trust: unknown property ${key}`);
-    if (!taxonomy.trust[manifest.trust.level]) errors.push(`${at}.trust.level: unknown taxonomy term`);
-    if (typeof manifest.trust.source !== "string" || !manifest.trust.source) errors.push(`${at}.trust.source: required`);
-    if (!Number.isFinite(Date.parse(manifest.trust.reviewedAt))) errors.push(`${at}.trust.reviewedAt: date-time required`);
-  }
-  if (manifest.tags && [...manifest.tags].sort().join("\0") !== manifest.tags.join("\0")) errors.push(`${at}.tags: must be sorted`);
-  if (manifest.capabilities && [...manifest.capabilities].sort().join("\0") !== manifest.capabilities.join("\0")) errors.push(`${at}.capabilities: must be sorted`);
+  if (!taxonomy.trust[manifest.publisherTrust]) errors.push(`${at}.publisherTrust: unknown trust level`);
+  for (const field of ["categoryIds", "tagIds", "capabilities", "aliases"]) if (manifest[field] && [...manifest[field]].sort().join("\0") !== manifest[field].join("\0")) errors.push(`${at}.${field}: must be sorted`);
 }
 
 export function taxonomyDocument(kind) {
-  if (!["categories", "tags"].includes(kind)) throw new Error(`unsupported taxonomy: ${kind}`);
-  return { schemaVersion: 1, kind, terms: Object.entries(taxonomy[kind]).sort(([a], [b]) => a.localeCompare(b)).map(([id, label]) => ({ id, label })) };
+  if (!['categories', 'tags'].includes(kind)) throw new Error(`unsupported taxonomy: ${kind}`);
+  const values = Object.entries(taxonomy[kind]).sort(([, a], [, b]) => a.order - b.order).map(([id, value]) => ({ id, ...value }));
+  return { [kind]: values };
 }

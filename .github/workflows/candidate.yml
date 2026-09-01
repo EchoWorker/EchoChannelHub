@@ -29,16 +29,39 @@ jobs:
           if ($actual -ne "${{ inputs.version }}") { throw "requested version does not match channel.json" }
       - run: node src/hubctl.js package ${{ inputs.channel }} --target windows-x64 --bundle-runtime
       - run: node src/hubctl.js verify artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel
+      - name: Create draft preview release and upload candidate
+        id: release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: preview-${{ inputs.version }}
+        run: |
+          gh release delete "$env:TAG" --yes --cleanup-tag 2>$null
+          gh release create "$env:TAG" --draft --prerelease --title "TEST ONLY preview ${{ inputs.channel }} ${{ inputs.version }}" --notes "TEST ONLY preview. Signed by the committed non-production test key. Never trust in production."
+          gh release upload "$env:TAG" "artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel" "artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel.json"
+          $release = gh api "repos/${{ github.repository }}/releases/tags/$env:TAG" | ConvertFrom-Json
+          $assetName = "${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel"
+          $asset = $release.assets | Where-Object name -eq $assetName
+          if (-not $asset) { throw "uploaded release asset missing" }
+          $download = Join-Path $env:RUNNER_TEMP $assetName
+          Invoke-WebRequest -Uri $asset.browser_download_url -Headers @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = "application/octet-stream" } -OutFile $download
+          $metaPath = "artifacts/$assetName.json"
+          $meta = Get-Content $metaPath | ConvertFrom-Json
+          $meta.size = (Get-Item $download).Length
+          $meta.sha256 = (Get-FileHash $download -Algorithm SHA256).Hash.ToLowerInvariant()
+          $meta | Add-Member -NotePropertyName url -NotePropertyValue $asset.browser_download_url -Force
+          $meta | ConvertTo-Json -Depth 10 | Set-Content $metaPath -Encoding utf8NoBOM
       - run: node src/hubctl.js build-registry
       - run: node src/hubctl.js validate
-      - name: Publish TEST ONLY preview release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: preview-${{ inputs.version }}
-          name: TEST ONLY preview ${{ inputs.channel }} ${{ inputs.version }}
-          prerelease: true
-          make_latest: false
-          body: "TEST ONLY preview. Signed by the committed non-production test key. Never trust in production."
-          files: |
-            artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel
-            artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel.json
+      - name: Publish registry and preview release atomically
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: preview-${{ inputs.version }}
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add registry
+          git commit -m "chore: publish $env:TAG registry"
+          gh release edit "$env:TAG" --draft=false --prerelease
+          git push origin HEAD:main

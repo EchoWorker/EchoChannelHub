@@ -40,3 +40,5 @@ jobs:
           test -f "registry/$relative"
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify deployed closure and release artifact
+        run: node src/hubctl.js validate-pages https://echoworker.github.io/EchoChannelHub/v1/latest.json

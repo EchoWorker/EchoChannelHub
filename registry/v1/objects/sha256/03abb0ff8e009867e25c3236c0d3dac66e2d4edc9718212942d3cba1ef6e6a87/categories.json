@@ -1,0 +1,59 @@
+{
+  "categories": [
+    {
+      "id": "messaging",
+      "order": 10,
+      "labels": {
+        "en": "Messaging",
+        "zh-CN": "即时通讯"
+      },
+      "deprecated": false,
+      "replacedBy": null,
+      "aliases": []
+    },
+    {
+      "id": "enterprise",
+      "order": 20,
+      "labels": {
+        "en": "Enterprise",
+        "zh-CN": "企业"
+      },
+      "deprecated": false,
+      "replacedBy": null,
+      "aliases": []
+    },
+    {
+      "id": "automation",
+      "order": 30,
+      "labels": {
+        "en": "Automation",
+        "zh-CN": "自动化"
+      },
+      "deprecated": false,
+      "replacedBy": null,
+      "aliases": []
+    },
+    {
+      "id": "developer",
+      "order": 40,
+      "labels": {
+        "en": "Developer",
+        "zh-CN": "开发者"
+      },
+      "deprecated": false,
+      "replacedBy": null,
+      "aliases": []
+    },
+    {
+      "id": "other",
+      "order": 1000,
+      "labels": {
+        "en": "Other",
+        "zh-CN": "其他"
+      },
+      "deprecated": false,
+      "replacedBy": null,
+      "aliases": []
+    }
+  ]
+}

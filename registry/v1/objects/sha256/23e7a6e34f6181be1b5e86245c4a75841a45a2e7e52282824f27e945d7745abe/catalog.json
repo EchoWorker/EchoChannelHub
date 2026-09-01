@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "sequence": 1,
+  "generatedAt": "2026-09-01T13:00:00.000Z",
+  "expiresAt": "2026-10-01T13:00:00.000Z",
+  "channels": [
+    {
+      "publisher": "EchoWorker",
+      "id": "wechat",
+      "name": {
+        "en": "WeChat",
+        "zh-CN": "微信"
+      },
+      "summary": {
+        "en": "WeChat channel for EchoAI.",
+        "zh-CN": "EchoAI 微信通道。"
+      },
+      "description": {
+        "en": "Connect EchoAI to WeChat through guided QR-code setup and exchange text, images, and audio.",
+        "zh-CN": "通过二维码引导配置将 EchoAI 连接到微信，并收发文本、图片和音频。"
+      },
+      "aliases": [
+        "wechat",
+        "wx"
+      ],
+      "categoryIds": [
+        "messaging"
+      ],
+      "tagIds": [
+        "direct-message",
+        "media",
+        "multi-account"
+      ],
+      "capabilities": [
+        "media",
+        "receive",
+        "send"
+      ],
+      "highlights": [
+        {
+          "en": "Guided QR-code setup",
+          "zh-CN": "二维码引导配置"
+        },
+        {
+          "en": "Text, image, and audio messaging",
+          "zh-CN": "文本、图片和音频消息"
+        }
+      ],
+      "publisherTrust": "official",
+      "setupMethod": {
+        "en": "Guided setup window",
+        "zh-CN": "引导式配置窗口"
+      },
+      "runtime": {
+        "en": "Bundled Node.js runtime",
+        "zh-CN": "内置 Node.js 运行时"
+      },
+      "releases": [
+        {
+          "version": "0.1.4",
+          "status": "active",
+          "engines": {
+            "echowork": ">=0.1.0"
+          },
+          "artifacts": {
+            "windows-x64": {
+              "url": "https://github.com/EchoWorker/EchoChannelHub/releases/download/preview-0.1.4/wechat-0.1.4-windows-x64.echochannel",
+              "size": 35518275,
+              "sha256": "a93d4f8b668968e644c4372722e54a713fe241ede4108fb503926b5f5b5b477a",
+              "signature": "N/WzU8juv/xd1X3ja02AlguBphL9TM0yWvrkDEVH4SPDWj5e7cZe2+UKg0uXpMo2fa6RYpobgzRs75xh3aQOCQ==",
+              "keyId": "echoworker-test-2026"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "sequence": 1,
+  "generatedAt": "2026-09-01T13:00:00.000Z",
+  "expiresAt": "2026-10-01T13:00:00.000Z",
+  "keyId": "echoworker-test-2026",
+  "testOnly": true,
+  "blobs": {
+    "catalog": {
+      "sha256": "23e7a6e34f6181be1b5e86245c4a75841a45a2e7e52282824f27e945d7745abe",
+      "url": "https://echoworker.github.io/EchoChannelHub/v1/objects/sha256/23e7a6e34f6181be1b5e86245c4a75841a45a2e7e52282824f27e945d7745abe/catalog.json",
+      "size": 2152
+    },
+    "categories": {
+      "sha256": "03abb0ff8e009867e25c3236c0d3dac66e2d4edc9718212942d3cba1ef6e6a87",
+      "url": "https://echoworker.github.io/EchoChannelHub/v1/objects/sha256/03abb0ff8e009867e25c3236c0d3dac66e2d4edc9718212942d3cba1ef6e6a87/categories.json",
+      "size": 1085
+    },
+    "tags": {
+      "sha256": "bb17bf0326c0e0072a294b6248ed286e0c1a9523693520802ea060032ce535bb",
+      "url": "https://echoworker.github.io/EchoChannelHub/v1/objects/sha256/bb17bf0326c0e0072a294b6248ed286e0c1a9523693520802ea060032ce535bb/tags.json",
+      "size": 669
+    }
+  },
+  "changedSet": {
+    "base": null,
+    "channels": [
+      "wechat"
+    ],
+    "taxonomy": [
+      "categories",
+      "tags"
+    ]
+  }
+}

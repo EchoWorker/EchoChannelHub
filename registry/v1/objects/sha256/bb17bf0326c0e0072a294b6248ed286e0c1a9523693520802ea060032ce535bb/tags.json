@@ -1,0 +1,37 @@
+{
+  "tags": [
+    {
+      "id": "direct-message",
+      "group": "scenario",
+      "order": 10,
+      "labels": {
+        "en": "Direct message",
+        "zh-CN": "私聊"
+      },
+      "deprecated": false,
+      "aliases": []
+    },
+    {
+      "id": "media",
+      "group": "capability",
+      "order": 20,
+      "labels": {
+        "en": "Media",
+        "zh-CN": "媒体"
+      },
+      "deprecated": false,
+      "aliases": []
+    },
+    {
+      "id": "multi-account",
+      "group": "capability",
+      "order": 30,
+      "labels": {
+        "en": "Multi-account",
+        "zh-CN": "多账号"
+      },
+      "deprecated": false,
+      "aliases": []
+    }
+  ]
+}

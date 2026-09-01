@@ -15,6 +15,7 @@
   "scripts": {
     "hubctl": "node src/hubctl.js",
     "validate": "node src/hubctl.js validate",
+    "validate-pages": "node src/hubctl.js validate-pages",
     "build-catalog": "node src/hubctl.js build-registry --check",
     "build-registry": "node src/hubctl.js build-registry",
     "package:wechat": "node src/hubctl.js package wechat --target windows-x64 --bundle-runtime",
