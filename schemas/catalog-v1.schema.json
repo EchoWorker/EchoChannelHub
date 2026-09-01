@@ -1,28 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/EchoWorker/EchoChannelHub/main/schemas/catalog-v1.schema.json",
-  "title": "EchoWork channel_manager catalog v1",
-  "type": "object",
-  "additionalProperties": false,
+  "title": "EchoChannelHub semantic catalog v1",
+  "type": "object", "additionalProperties": false,
   "required": ["schemaVersion", "sequence", "generatedAt", "expiresAt", "channels"],
-  "properties": {
-    "schemaVersion": {"const": 1},
-    "sequence": {"type": "integer", "minimum": 0},
-    "generatedAt": {"type": "string", "format": "date-time"},
-    "expiresAt": {"type": "string", "format": "date-time"},
-    "channels": {"type": "array", "items": {"$ref": "#/$defs/channel"}}
-  },
+  "properties": {"schemaVersion": {"const": 1}, "sequence": {"type": "integer", "minimum": 0}, "generatedAt": {"type": "string", "format": "date-time"}, "expiresAt": {"type": "string", "format": "date-time"}, "channels": {"type": "array", "items": {"$ref": "#/$defs/channel"}}},
   "$defs": {
-    "channel": {"type": "object", "additionalProperties": false, "required": ["publisher", "id", "name", "summary", "releases"], "properties": {
-      "publisher": {"type": "string", "minLength": 1}, "id": {"type": "string", "minLength": 1}, "name": {"type": "string", "minLength": 1}, "summary": {"type": "string"},
-      "releases": {"type": "array", "items": {"$ref": "#/$defs/release"}}
-    }},
-    "release": {"type": "object", "additionalProperties": false, "required": ["version", "status", "artifacts"], "properties": {
-      "version": {"type": "string"}, "status": {"enum": ["active", "yanked", "revoked"]},
-      "artifacts": {"type": "object", "additionalProperties": false, "required": ["windows-x64"], "properties": {"windows-x64": {"$ref": "#/$defs/artifact"}}}
-    }},
-    "artifact": {"type": "object", "additionalProperties": false, "required": ["url", "size", "sha256", "signature", "keyId"], "properties": {
-      "url": {"type": "string", "pattern": "^https://"}, "size": {"type": "integer", "minimum": 0}, "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "signature": {"type": "string", "minLength": 1}, "keyId": {"type": "string", "minLength": 1}
-    }}
+    "localized": {"type": "object", "additionalProperties": false, "required": ["en", "zh-CN"], "properties": {"en": {"type": "string", "minLength": 1}, "zh-CN": {"type": "string", "minLength": 1}}},
+    "channel": {"type": "object", "additionalProperties": false, "required": ["publisher", "id", "name", "description", "details", "category", "tags", "capabilities", "trust", "releases"], "properties": {"publisher": {"type": "string"}, "id": {"type": "string"}, "name": {"type": "string"}, "description": {"$ref": "#/$defs/localized"}, "details": {"$ref": "#/$defs/localized"}, "category": {"type": "string"}, "tags": {"type": "array", "items": {"type": "string"}}, "capabilities": {"type": "array", "items": {"type": "string"}}, "trust": {"type": "object"}, "releases": {"type": "array", "items": {"$ref": "#/$defs/release"}}}},
+    "release": {"type": "object", "additionalProperties": false, "required": ["version", "status", "artifacts"], "properties": {"version": {"type": "string"}, "status": {"enum": ["active", "yanked", "revoked"]}, "artifacts": {"type": "object", "additionalProperties": false, "required": ["windows-x64"], "properties": {"windows-x64": {"$ref": "#/$defs/artifact"}}}}},
+    "artifact": {"type": "object", "additionalProperties": false, "required": ["url", "size", "sha256", "signature", "keyId"], "properties": {"url": {"type": "string", "pattern": "^https://"}, "size": {"type": "integer", "minimum": 0}, "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "signature": {"type": "string"}, "keyId": {"type": "string"}}}
   }
 }

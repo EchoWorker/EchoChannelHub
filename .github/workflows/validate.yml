@@ -15,7 +15,6 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npm run package:wechat
       - run: npm test
       - run: npm run check
       - run: npm run build --workspace=@echoworker/echo-wechat

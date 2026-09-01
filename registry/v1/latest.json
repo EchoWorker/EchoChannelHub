@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "testOnly": true,
+  "snapshot": {
+    "sha256": "c9b1eff92408b82214c45d1e48f43c6c99a966ea899737e63cc1a2647ceb99ed",
+    "url": "https://echoworker.github.io/EchoChannelHub/registry/v1/snapshots/sha256/c9b1eff92408b82214c45d1e48f43c6c99a966ea899737e63cc1a2647ceb99ed/snapshot.json"
+  }
+}

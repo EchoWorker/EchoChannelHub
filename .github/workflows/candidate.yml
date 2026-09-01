@@ -1,8 +1,17 @@
-name: candidate
+name: preview-release
 on:
   workflow_dispatch:
+    inputs:
+      channel:
+        description: Channel id
+        required: true
+        default: wechat
+      version:
+        description: Version (must match channel.json)
+        required: true
+        default: 0.1.4
 permissions:
-  contents: read
+  contents: write
 jobs:
   windows-x64:
     runs-on: windows-latest
@@ -13,15 +22,23 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: node src/hubctl.js package wechat --target windows-x64 --bundle-runtime
-      - run: node src/hubctl.js verify artifacts/wechat-0.1.4-windows-x64.echochannel
-      - uses: actions/upload-artifact@v4
+      - name: Check requested version
+        shell: pwsh
+        run: |
+          $actual = (Get-Content "channels/${{ inputs.channel }}/channel.json" | ConvertFrom-Json).version
+          if ($actual -ne "${{ inputs.version }}") { throw "requested version does not match channel.json" }
+      - run: node src/hubctl.js package ${{ inputs.channel }} --target windows-x64 --bundle-runtime
+      - run: node src/hubctl.js verify artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel
+      - run: node src/hubctl.js build-registry
+      - run: node src/hubctl.js validate
+      - name: Publish TEST ONLY preview release
+        uses: softprops/action-gh-release@v2
         with:
-          name: wechat-0.1.4-windows-x64-TEST-ONLY-candidate
-          path: |
-            artifacts/wechat-0.1.4-windows-x64.echochannel
-            artifacts/wechat-0.1.4-windows-x64.echochannel.json
-            registry/v1/catalog.json
-            registry/v1/catalog.json.sig
-            test/keys/TEST_ONLY_ed25519_public.json
-          if-no-files-found: error
+          tag_name: preview-${{ inputs.version }}
+          name: TEST ONLY preview ${{ inputs.channel }} ${{ inputs.version }}
+          prerelease: true
+          make_latest: false
+          body: "TEST ONLY preview. Signed by the committed non-production test key. Never trust in production."
+          files: |
+            artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel
+            artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel.json

@@ -1,14 +1,29 @@
 {
+  "$schema": "../../schemas/channel-source-v1.schema.json",
   "schemaVersion": 1,
   "publisher": "EchoWorker",
   "id": "wechat",
   "name": "Echo WeChat",
   "version": "0.1.4",
-  "summary": "WeChat channel for EchoAI with text and media support.",
+  "description": {
+    "en": "WeChat channel for EchoAI with text and media support.",
+    "zh-CN": "为 EchoAI 提供文本和媒体支持的微信通道。"
+  },
+  "details": {
+    "en": "Connect EchoAI to WeChat through guided QR-code setup and exchange text, images, and audio.",
+    "zh-CN": "通过二维码引导配置将 EchoAI 连接到微信，并收发文本、图片和音频。"
+  },
+  "category": "messaging",
+  "tags": ["social", "wechat"],
   "license": "MIT",
   "runtime": "node",
   "entrypoint": "dist/cli.js",
   "target": "windows-x64",
-  "capabilities": ["text", "image", "audio", "setup"],
+  "capabilities": ["audio", "image", "setup", "text"],
+  "trust": {
+    "level": "verified",
+    "source": "EchoWorker repository review",
+    "reviewedAt": "2026-09-01T00:00:00Z"
+  },
   "provenance": "MIGRATION.json"
 }

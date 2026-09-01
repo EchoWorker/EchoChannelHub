@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/EchoWorker/EchoChannelHub/main/schemas/channel-source-v1.schema.json",
+  "title": "EchoChannelHub source channel v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "publisher", "id", "name", "version", "description", "details", "category", "tags", "license", "runtime", "entrypoint", "target", "capabilities", "trust", "provenance"],
+  "properties": {
+    "$schema": {"type": "string"}, "schemaVersion": {"const": 1}, "publisher": {"type": "string", "minLength": 1},
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"}, "name": {"type": "string", "minLength": 1}, "version": {"type": "string"},
+    "description": {"$ref": "#/$defs/localized"}, "details": {"$ref": "#/$defs/localized"},
+    "category": {"enum": ["messaging"]}, "tags": {"type": "array", "uniqueItems": true, "items": {"enum": ["social", "wechat"]}},
+    "license": {"type": "string"}, "runtime": {"const": "node"}, "entrypoint": {"type": "string"}, "target": {"const": "windows-x64"},
+    "capabilities": {"type": "array", "uniqueItems": true, "items": {"enum": ["audio", "image", "setup", "text"]}},
+    "trust": {"type": "object", "additionalProperties": false, "required": ["level", "source", "reviewedAt"], "properties": {"level": {"enum": ["community", "verified"]}, "source": {"type": "string", "minLength": 1}, "reviewedAt": {"type": "string", "format": "date-time"}}},
+    "provenance": {"type": "string"}
+  },
+  "$defs": {"localized": {"type": "object", "additionalProperties": false, "required": ["en", "zh-CN"], "properties": {"en": {"type": "string", "minLength": 1}, "zh-CN": {"type": "string", "minLength": 1}}}}
+}
