@@ -39,7 +39,7 @@ jobs:
           gh release delete "$env:TAG" --yes --cleanup-tag 2>$null
           gh release create "$env:TAG" --draft --prerelease --title "TEST ONLY preview ${{ inputs.channel }} ${{ inputs.version }}" --notes "TEST ONLY preview. Signed by the committed non-production test key. Never trust in production."
           gh release upload "$env:TAG" "artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel" "artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel.json"
-          $release = gh api "repos/${{ github.repository }}/releases/tags/$env:TAG" | ConvertFrom-Json
+          $release = gh api "repos/${{ github.repository }}/releases" | ConvertFrom-Json | Where-Object tag_name -eq $env:TAG | Select-Object -First 1
           $assetName = "${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel"
           $asset = $release.assets | Where-Object name -eq $assetName
           if (-not $asset) { throw "uploaded release asset missing" }
