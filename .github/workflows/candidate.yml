@@ -44,7 +44,7 @@ jobs:
           $asset = $release.assets | Where-Object name -eq $assetName
           if (-not $asset) { throw "uploaded release asset missing" }
           $download = Join-Path $env:RUNNER_TEMP $assetName
-          gh api -H "Accept: application/octet-stream" "repos/${{ github.repository }}/releases/assets/$($asset.id)" | Set-Content $download -AsByteStream
+          gh api -H "Accept: application/octet-stream" "repos/${{ github.repository }}/releases/assets/$($asset.id)" > $download
           $metaPath = "artifacts/$assetName.json"
           $meta = Get-Content $metaPath | ConvertFrom-Json
           $meta.size = (Get-Item $download).Length
