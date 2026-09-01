@@ -16,11 +16,12 @@
     "hubctl": "node src/hubctl.js",
     "validate": "node src/hubctl.js validate",
     "build-catalog": "node src/hubctl.js build-catalog --check",
+    "package:wechat": "node src/hubctl.js package wechat --target windows-x64 --bundle-runtime",
     "check": "npm run validate && npm run build-catalog",
     "test": "node --test test/candidate.test.js test/catalog.test.js test/validation.test.js"
   },
   "devDependencies": {
-    "yauzl": "^3.4.0",
-    "yazl": "^3.3.1"
+    "yauzl": "3.4.0",
+    "yazl": "3.3.1"
   }
 }

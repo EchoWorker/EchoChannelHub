@@ -10,8 +10,10 @@ import { TARGET, TEST_KEY_ID, artifactManifest, loadChannels, makeCatalog, readJ
 
 function fail(message, code = 1) { process.stderr.write(`${message}\n`); process.exitCode = code; }
 function run(command, args, cwd) {
-  const executable = process.platform === "win32" && command === "npm" ? "npm.cmd" : command;
-  const r = spawnSync(executable, args, { cwd, stdio: "inherit", shell: false });
+  const executable = process.platform === "win32" && command === "npm" ? (process.env.ComSpec ?? "cmd.exe") : command;
+  const commandArgs = process.platform === "win32" && command === "npm" ? ["/d", "/s", "/c", "npm.cmd", ...args] : args;
+  const r = spawnSync(executable, commandArgs, { cwd, stdio: "inherit", shell: false });
+  if (r.error) throw r.error;
   if (r.status !== 0) throw new Error(`${command} ${args.join(" ")} failed (${r.status})`);
 }
 function option(args, name) { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : undefined; }
