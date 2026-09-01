@@ -17,7 +17,7 @@
     "validate": "node src/hubctl.js validate",
     "build-catalog": "node src/hubctl.js build-catalog --check",
     "check": "npm run validate && npm run build-catalog",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/candidate.test.js test/catalog.test.js test/validation.test.js"
   },
   "devDependencies": {
     "yauzl": "^3.4.0",
