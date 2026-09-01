@@ -49,7 +49,7 @@ jobs:
           $meta = Get-Content $metaPath | ConvertFrom-Json
           $meta.size = (Get-Item $download).Length
           $meta.sha256 = (Get-FileHash $download -Algorithm SHA256).Hash.ToLowerInvariant()
-          $meta | Add-Member -NotePropertyName url -NotePropertyValue $asset.browser_download_url -Force
+          $meta | Add-Member -NotePropertyName url -NotePropertyValue "https://github.com/${{ github.repository }}/releases/download/$env:TAG/$assetName" -Force
           $meta | ConvertTo-Json -Depth 10 | Set-Content $metaPath -Encoding utf8NoBOM
       - run: node src/hubctl.js build-registry
       - run: node src/hubctl.js validate
