@@ -3,27 +3,58 @@
   "schemaVersion": 1,
   "publisher": "EchoWorker",
   "id": "wechat",
-  "name": { "en": "WeChat", "zh-CN": "微信" },
-  "version": "0.1.5",
-  "summary": { "en": "WeChat channel for EchoAI.", "zh-CN": "EchoAI 微信通道。" },
+  "name": {
+    "en": "WeChat",
+    "zh-CN": "微信"
+  },
+  "version": "0.1.6",
+  "summary": {
+    "en": "WeChat channel for EchoAI.",
+    "zh-CN": "EchoAI 微信通道。"
+  },
   "description": {
     "en": "Connect EchoAI to WeChat through guided QR-code setup and exchange text, images, and audio.",
     "zh-CN": "通过二维码引导配置将 EchoAI 连接到微信，并收发文本、图片和音频。"
   },
-  "aliases": ["wechat", "wx"],
-  "categoryIds": ["messaging"],
-  "tagIds": ["direct-message", "media", "multi-account"],
+  "aliases": [
+    "wechat",
+    "wx"
+  ],
+  "categoryIds": [
+    "messaging"
+  ],
+  "tagIds": [
+    "direct-message",
+    "media",
+    "multi-account"
+  ],
   "license": "MIT",
   "runtime": "node",
-  "runtimeLabel": { "en": "Bundled Node.js runtime", "zh-CN": "内置 Node.js 运行时" },
+  "runtimeLabel": {
+    "en": "Bundled Node.js runtime",
+    "zh-CN": "内置 Node.js 运行时"
+  },
   "entrypoint": "dist/cli.js",
   "target": "windows-x64",
-  "capabilities": ["media", "receive", "send"],
+  "capabilities": [
+    "media",
+    "receive",
+    "send"
+  ],
   "highlights": [
-    { "en": "Guided QR-code setup", "zh-CN": "二维码引导配置" },
-    { "en": "Text, image, and audio messaging", "zh-CN": "文本、图片和音频消息" }
+    {
+      "en": "Guided QR-code setup",
+      "zh-CN": "二维码引导配置"
+    },
+    {
+      "en": "Text, image, and audio messaging",
+      "zh-CN": "文本、图片和音频消息"
+    }
   ],
   "publisherTrust": "official",
-  "setupMethod": { "en": "Guided setup window", "zh-CN": "引导式配置窗口" },
+  "setupMethod": {
+    "en": "Guided setup window",
+    "zh-CN": "引导式配置窗口"
+  },
   "provenance": "MIGRATION.json"
 }
