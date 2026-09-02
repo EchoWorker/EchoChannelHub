@@ -101,7 +101,7 @@ async function main(): Promise<void> {
         process.exitCode = 2;
         return;
       }
-      if (args[0] === "--json") process.stdout.write(`${JSON.stringify({ publisher: "EchoWorker", id: "wechat", version: packageJson.version, protocols: { setup: 1, start: 1 } })}\n`);
+      if (args[0] === "--json") process.stdout.write(`${JSON.stringify({ publisher: "EchoWorker", id: "wechat", version: packageJson.version, protocols: { setup: 2, start: 1 } })}\n`);
       else process.stdout.write(`${packageJson.version}\n`);
       break;
     }
