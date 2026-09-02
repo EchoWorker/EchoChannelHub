@@ -76,7 +76,9 @@ function getLocalBotTokenList(): string[] {
   return tokens;
 }
 
-async function fetchQRCode(apiBaseUrl: string, botType: string): Promise<QRCodeResponse> {
+const QR_START_TIMEOUT_MS = Number.parseInt(process.env.ECHO_WECHAT_QR_START_TIMEOUT_MS ?? "20000", 10);
+
+async function fetchQRCode(apiBaseUrl: string, botType: string, abortSignal?: AbortSignal): Promise<QRCodeResponse> {
   logger.info(`NewFetching QR code from: ${apiBaseUrl} bot_type=${botType}`);
   const localTokenList = getLocalBotTokenList();
   logger.info(`newfetchQRCode: local_token_list count=${localTokenList.length}`);
@@ -85,6 +87,8 @@ async function fetchQRCode(apiBaseUrl: string, botType: string): Promise<QRCodeR
     endpoint: `ilink/bot/get_bot_qrcode?bot_type=${encodeURIComponent(botType)}`,
     body: JSON.stringify({ local_token_list: localTokenList }),
     label: "fetchQRCode",
+    timeoutMs: QR_START_TIMEOUT_MS,
+    abortSignal,
   });
   return JSON.parse(rawText) as QRCodeResponse;
 }
@@ -181,6 +185,7 @@ export async function startWeixinLoginWithQr(opts: {
   accountId?: string;
   apiBaseUrl: string;
   botType?: string;
+  abortSignal?: AbortSignal;
 }): Promise<WeixinQrStartResult> {
   const sessionKey = opts.accountId || randomUUID();
 
@@ -199,7 +204,7 @@ export async function startWeixinLoginWithQr(opts: {
     const botType = opts.botType || DEFAULT_ILINK_BOT_TYPE;
     logger.info(`Starting Weixin login with bot_type=${botType}`);
 
-    const qrResponse = await fetchQRCode(FIXED_BASE_URL, botType);
+    const qrResponse = await fetchQRCode(FIXED_BASE_URL, botType, opts.abortSignal);
     logger.info(
       `QR code received, qrcode=${redactToken(qrResponse.qrcode)} imgContentLen=${qrResponse.qrcode_img_content?.length ?? 0}`,
     );
@@ -221,6 +226,9 @@ export async function startWeixinLoginWithQr(opts: {
       sessionKey,
     };
   } catch (err) {
+    if (err instanceof Error && err.name === "AbortError" && opts.abortSignal?.aborted) {
+      throw err;
+    }
     logger.error(`Failed to start Weixin login: ${String(err)}`);
     return {
       message: `Failed to start login: ${String(err)}`,

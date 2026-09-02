@@ -20,7 +20,7 @@ export async function runSetup(opts: SetupOptions): Promise<void> {
   process.once("SIGINT", onSignal); process.once("SIGTERM", onSignal);
   try {
     frame({ type:"echowork.channel_setup.ready", version:1, session_id:opts.sessionId, url:server.url });
-    const started = await startWeixinLoginWithQr({ apiBaseUrl:DEFAULT_BASE_URL, botType:DEFAULT_ILINK_BOT_TYPE, force:true });
+    const started = await startWeixinLoginWithQr({ apiBaseUrl:DEFAULT_BASE_URL, botType:DEFAULT_ILINK_BOT_TYPE, force:true, abortSignal:abort.signal });
     if (!started.qrcodeUrl) throw new Error(started.message);
     snapshot = { status:"wait", message:"请用小号微信扫描二维码", qrUrl:started.qrcodeUrl, qrVersion:1 };
     const result = await waitForWeixinLogin({
