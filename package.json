@@ -14,11 +14,11 @@
   },
   "scripts": {
     "hubctl": "node src/hubctl.js",
-    "validate": "node src/hubctl.js validate",
-    "validate-pages": "node src/hubctl.js validate-pages",
-    "build-catalog": "node src/hubctl.js build-registry --check",
-    "build-registry": "node src/hubctl.js build-registry",
-    "package:wechat": "node src/hubctl.js package wechat --target windows-x64 --bundle-runtime",
+    "validate": "node src/hubctl.js validate --production",
+    "validate-pages": "node src/hubctl.js validate-pages --production",
+    "build-catalog": "node src/hubctl.js build-registry --check --production",
+    "build-registry": "node src/hubctl.js build-registry --production",
+    "package:wechat": "node src/hubctl.js package wechat --target windows-x64 --bundle-runtime --fixture",
     "check": "npm run validate && npm run build-catalog",
     "test": "node --test test/candidate.test.js test/catalog.test.js test/signing.test.js test/validation.test.js"
   },

@@ -12,7 +12,7 @@ import { buildRegistry, loadRegistry, validatePublishedClosure, validateRegistry
 const fail = (message, code=1) => { process.stderr.write(`${message}\n`); process.exitCode=code; };
 function run(command,args,cwd){const executable=process.platform==="win32"&&command==="npm"?(process.env.ComSpec??"cmd.exe"):command;const commandArgs=process.platform==="win32"&&command==="npm"?["/d","/s","/c","npm.cmd",...args]:args;const r=spawnSync(executable,commandArgs,{cwd,stdio:"inherit",shell:false});if(r.error)throw r.error;if(r.status!==0)throw new Error(`${command} ${args.join(" ")} failed (${r.status})`);}
 const option=(args,name)=>{const i=args.indexOf(name);return i>=0?args[i+1]:undefined};
-const production=args=>args.includes("--production");
+const production=args=>!args.includes("--fixture");
 const signing=args=>{const profile=signatureProfile({production:production(args)});return{...profile,signer:createSigner({production:production(args)}),verifier:production(args)?createVerifier(PRODUCTION_PUBLIC_KEY_FILE):testVerifier};};
 const verification=args=>{const profile=signatureProfile({production:production(args)});return{...profile,verifier:production(args)?createVerifier(PRODUCTION_PUBLIC_KEY_FILE):testVerifier};};
 function copyFiltered(src,dest){const excluded=new Set([".git","node_modules","dist","artifacts"]);fs.cpSync(src,dest,{recursive:true,filter:s=>!excluded.has(path.basename(s))});}
