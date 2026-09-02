@@ -9,7 +9,7 @@ npm ci
 npm test
 npm run check
 node src/hubctl.js package wechat --target windows-x64 --bundle-runtime
-node src/hubctl.js verify artifacts/wechat-0.1.4-windows-x64.echochannel
+node src/hubctl.js verify artifacts/wechat-0.1.5-windows-x64.echochannel
 ```
 
 The package command emits one ZIP-format `.echochannel` with a root `manifest.json`, a signed sidecar, and a signed catalog. It refuses every other target and makes no production-signing claim.

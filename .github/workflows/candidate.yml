@@ -9,7 +9,7 @@ on:
       version:
         description: Version (must match channel.json)
         required: true
-        default: 0.1.4
+        default: 0.1.5
 permissions:
   contents: write
 jobs:

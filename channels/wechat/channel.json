@@ -4,7 +4,7 @@
   "publisher": "EchoWorker",
   "id": "wechat",
   "name": { "en": "WeChat", "zh-CN": "微信" },
-  "version": "0.1.4",
+  "version": "0.1.5",
   "summary": { "en": "WeChat channel for EchoAI.", "zh-CN": "EchoAI 微信通道。" },
   "description": {
     "en": "Connect EchoAI to WeChat through guided QR-code setup and exchange text, images, and audio.",

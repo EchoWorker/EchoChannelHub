@@ -3,8 +3,8 @@
   "keyId": "echoworker-test-2026",
   "testOnly": true,
   "snapshot": {
-    "sha256": "99afbffe72c67cf178b8f37b5cea28e87d592688b0e2a59d2c71649b1424ce80",
+    "sha256": "fc8392236ef411c41e7e164ae2d208437141ab8b5b9bf6ba47b7ee8325a7e5a1",
     "size": 1212,
-    "url": "https://echoworker.github.io/EchoChannelHub/v1/snapshots/sha256/99afbffe72c67cf178b8f37b5cea28e87d592688b0e2a59d2c71649b1424ce80/snapshot.json"
+    "url": "https://echoworker.github.io/EchoChannelHub/v1/snapshots/sha256/fc8392236ef411c41e7e164ae2d208437141ab8b5b9bf6ba47b7ee8325a7e5a1/snapshot.json"
   }
 }

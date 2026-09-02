@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sequence": 3,
-  "generatedAt": "2026-09-01T12:33:32.435Z",
-  "expiresAt": "2026-10-01T12:33:32.435Z",
+  "sequence": 4,
+  "generatedAt": "2026-09-02T01:16:13.763Z",
+  "expiresAt": "2026-10-02T01:16:13.763Z",
   "channels": [
     {
       "publisher": "EchoWorker",
@@ -57,17 +57,17 @@
       },
       "releases": [
         {
-          "version": "0.1.4",
+          "version": "0.1.5",
           "status": "active",
           "engines": {
             "echowork": ">=0.1.0"
           },
           "artifacts": {
             "windows-x64": {
-              "url": "https://github.com/EchoWorker/EchoChannelHub/releases/download/preview-0.1.4/wechat-0.1.4-windows-x64.echochannel",
-              "size": 29844496,
-              "sha256": "497e3267aab147d1aeb204a438f42f8c5fd3c67ef4a73a8aa7a44bcfce6355db",
-              "signature": "Wg1c5Q0mZnHQI8CPOuBNZZ+hxzeHk6Pn+/1MJgbz2IXfYPZsdcyT6DzThTre5UAjWNvGiDVdKEalfKirqU9wBA==",
+              "url": "https://github.com/EchoWorker/EchoChannelHub/releases/download/preview-0.1.5/wechat-0.1.5-windows-x64.echochannel",
+              "size": 35522008,
+              "sha256": "20c507ba05c0a5f7546b3e5266a8633f640d475a5d2ae9d8daaf124adfbeb9b9",
+              "signature": "azgXjSYWsn6kz7xJwGrd8rAnHO34FOSkECadjc1P3Kl2A3Y7hlbLBTByC8t0tqhlYw4P4nwyTNdSQP6uNpOECw==",
               "keyId": "echoworker-test-2026"
             }
           }
