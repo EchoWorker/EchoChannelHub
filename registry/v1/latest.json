@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "keyId": "echoworker-test-2026",
-  "testOnly": true,
+  "keyId": "echoworker-prod-2026",
+  "testOnly": false,
   "snapshot": {
-    "sha256": "c2716b10a0fafbc46ce0334e5f1a3e967063490116c8ec74f89a953fc90eda28",
-    "size": 1193,
-    "url": "https://echoworker.github.io/EchoChannelHub/v1/snapshots/sha256/c2716b10a0fafbc46ce0334e5f1a3e967063490116c8ec74f89a953fc90eda28/snapshot.json"
+    "sha256": "6272586c6c19f693dc56148bd8668ee6091b229a660011f1ca800738d5995288",
+    "size": 1214,
+    "url": "https://echoworker.github.io/EchoChannelHub/v1/snapshots/sha256/6272586c6c19f693dc56148bd8668ee6091b229a660011f1ca800738d5995288/snapshot.json"
   }
 }
