@@ -1,0 +1,76 @@
+name: release
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: Channel id
+        required: true
+        default: wechat
+      version:
+        description: Version (must match channel.json)
+        required: true
+        default: 0.1.10
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: windows-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Check requested version
+        shell: pwsh
+        run: |
+          $actual = (Get-Content "channels/${{ inputs.channel }}/channel.json" | ConvertFrom-Json).version
+          if ($actual -ne "${{ inputs.version }}") { throw "requested version does not match channel.json" }
+          if (git tag --list "v${{ inputs.version }}") { throw "release tag already exists" }
+      - name: Build and sign production artifact
+        env:
+          CHANNEL_HUB_SIGNING_KEY: ${{ secrets.CHANNEL_HUB_SIGNING_KEY }}
+        run: node src/hubctl.js package ${{ inputs.channel }} --target windows-x64 --bundle-runtime --production
+      - run: node src/hubctl.js verify artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel --production
+      - name: Create draft release and upload artifact
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v${{ inputs.version }}
+        run: |
+          gh release create "$env:TAG" --draft --title "${{ inputs.channel }} ${{ inputs.version }}" --notes "Approved production release. Signed with echoworker-prod-2026."
+          gh release upload "$env:TAG" "artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel" "artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel.json"
+          $assetName = "${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel"
+          $metaPath = "artifacts/$assetName.json"
+          $meta = Get-Content $metaPath | ConvertFrom-Json
+          $meta | Add-Member -NotePropertyName url -NotePropertyValue "https://github.com/${{ github.repository }}/releases/download/$env:TAG/$assetName" -Force
+          $meta | ConvertTo-Json -Depth 10 | Set-Content $metaPath -Encoding utf8NoBOM
+      - name: Build and verify production registry
+        env:
+          CHANNEL_HUB_SIGNING_KEY: ${{ secrets.CHANNEL_HUB_SIGNING_KEY }}
+        run: |
+          node src/hubctl.js build-registry --production
+          node src/hubctl.js validate --production
+      - name: Publish release and registry
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v${{ inputs.version }}
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add registry
+          git commit -m "chore: publish $env:TAG registry"
+          gh release edit "$env:TAG" --draft=false --latest
+          git push origin HEAD:main
+  deploy-pages:
+    needs: publish
+    uses: ./.github/workflows/pages.yml
+    with:
+      ref: main
+    permissions:
+      contents: read
+      pages: write
+      id-token: write

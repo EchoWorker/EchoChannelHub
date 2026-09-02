@@ -1,8 +1,11 @@
 name: pages
 on:
-  push:
-    branches: [main]
-    paths: ["registry/**", ".github/workflows/pages.yml"]
+  workflow_call:
+    inputs:
+      ref:
+        required: false
+        type: string
+        default: main
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,12 +22,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || 'main' }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: node src/hubctl.js validate
+      - name: Validate production registry
+        run: node src/hubctl.js validate --production
       - uses: actions/configure-pages@v5
         with:
           enablement: true
@@ -41,4 +47,4 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
       - name: Verify deployed closure and release artifact
-        run: node src/hubctl.js validate-pages https://echoworker.github.io/EchoChannelHub/v1/latest.json
+        run: node src/hubctl.js validate-pages https://echoworker.github.io/EchoChannelHub/v1/latest.json --production

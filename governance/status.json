@@ -3,7 +3,8 @@
   "requiredChecks": ["validate"],
   "catalogPath": "registry/v1/catalog.json",
   "candidatePolicy": {
-    "productionSigning": false,
+    "productionSigning": true,
+    "productionSigningKeyId": "echoworker-prod-2026",
     "testSigningKeyId": "echoworker-test-2026",
     "implementedTargets": ["windows-x64"]
   }
