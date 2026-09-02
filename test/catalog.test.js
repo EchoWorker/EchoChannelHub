@@ -3,16 +3,17 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { root, validateCatalog } from "../src/lib.js";
+import { PRODUCTION_KEY_ID, PRODUCTION_PUBLIC_KEY_FILE, createVerifier } from "../src/signing.js";
 import { loadRegistry, validateRegistry } from "../src/registry.js";
 
 const dir = path.join(root, "registry", "v1");
-test("content-addressed registry and all signatures validate", () => assert.deepEqual(validateRegistry(dir), []));
+test("content-addressed registry and all signatures validate", () => assert.deepEqual(validateRegistry(dir, { verifier: createVerifier(PRODUCTION_PUBLIC_KEY_FILE), keyId: PRODUCTION_KEY_ID, testOnly: false }), []));
 test("latest resolves immutable semantic catalog and taxonomies", () => {
   const value = loadRegistry(dir);
-  assert.equal(value.latest.testOnly, true);
-  assert.equal(value.latest.keyId, "echoworker-test-2026");
-  assert.equal(value.snapshot.testOnly, true);
-  assert.equal(value.snapshot.keyId, "echoworker-test-2026");
+  assert.equal(value.latest.testOnly, false);
+  assert.equal(value.latest.keyId, PRODUCTION_KEY_ID);
+  assert.equal(value.snapshot.testOnly, false);
+  assert.equal(value.snapshot.keyId, PRODUCTION_KEY_ID);
   assert.equal(value.latest.snapshot.size, value.snapshotBytes.length);
   assert.match(value.latest.snapshot.url, /snapshots\/sha256\/[a-f0-9]{64}\/snapshot\.json$/);
   assert.deepEqual(validateCatalog(value.objects.catalog), []);
