@@ -27,7 +27,8 @@ function printHelp(): void {
       "",
       "Usage:",
       "  echo-wechat version [--json]                   Print channel version metadata.",
-      "  echo-wechat setup --echowork-json --session-id <id>  Run the EchoWork loopback setup protocol.",
+      "  echo-wechat setup --echowork-json --session-id <id> --mode add",
+      "  echo-wechat setup --echowork-json --session-id <id> --mode restore --account <id>",
       "  echo-wechat login                              Interactive QR login (scan in a terminal); saves the bot token.",
       "  echo-wechat start [flags]                      Connect to the EchoAI gateway and run (spawned by EchoAI).",
       "",
@@ -108,12 +109,27 @@ async function main(): Promise<void> {
       const args = process.argv.slice(3);
       const jsonIndex = args.indexOf("--echowork-json");
       const sessionIndex = args.indexOf("--session-id");
-      if (jsonIndex < 0 || sessionIndex < 0 || !args[sessionIndex + 1] || args.some((a, i) => a.startsWith("--") && a !== "--echowork-json" && a !== "--session-id" && i !== sessionIndex + 1)) {
-        process.stderr.write("echo-wechat setup: requires --echowork-json --session-id <id>\n");
+      const modeIndex = args.indexOf("--mode");
+      const accountIndex = args.indexOf("--account");
+      const allowed = new Set(["--echowork-json", "--session-id", "--mode", "--account"]);
+      const flags = args.filter((arg) => arg.startsWith("--"));
+      const mode = args[modeIndex + 1];
+      const account = accountIndex >= 0 ? args[accountIndex + 1] : undefined;
+      const expectedFlags = mode === "add" ? 3 : 4;
+      const expectedArgs = mode === "add" ? 5 : 7;
+      const valid = jsonIndex >= 0
+        && sessionIndex >= 0 && Boolean(args[sessionIndex + 1])
+        && modeIndex >= 0 && (mode === "add" || mode === "restore")
+        && ((mode === "add" && accountIndex < 0) || (mode === "restore" && accountIndex >= 0 && Boolean(account)))
+        && flags.length === expectedFlags && flags.every((flag) => allowed.has(flag))
+        && new Set(flags).size === expectedFlags
+        && args.length === expectedArgs;
+      if (!valid) {
+        process.stderr.write("echo-wechat setup: requires exactly --mode add, or --mode restore --account <id> (plus JSON/session flags)\n");
         process.exitCode = 2;
         return;
       }
-      await runSetup({ echoworkJson: true, sessionId: args[sessionIndex + 1] });
+      await runSetup({ echoworkJson: true, sessionId: args[sessionIndex + 1], mode, ...(account ? { account } : {}) });
       break;
     }
     case "login":

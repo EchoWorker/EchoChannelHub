@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/EchoWorker/EchoChannelHub/main/schemas/channel-source-v2.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "publisher", "id", "name", "version", "summary", "description", "aliases", "categoryIds", "tagIds", "license", "runtime", "runtimeLabel", "entrypoint", "target", "capabilities", "highlights", "publisherTrust", "setupMethod", "setup", "provenance"],
+  "properties": {
+    "$schema": { "type": "string" }, "schemaVersion": { "const": 2 }, "publisher": { "type": "string", "minLength": 1 }, "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "name": { "$ref": "#/$defs/localized" }, "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$" }, "summary": { "$ref": "#/$defs/localized" }, "description": { "$ref": "#/$defs/localized" },
+    "aliases": { "$ref": "#/$defs/strings" }, "categoryIds": { "$ref": "#/$defs/strings" }, "tagIds": { "$ref": "#/$defs/strings" }, "license": { "type": "string", "minLength": 1 },
+    "runtime": { "const": "node" }, "runtimeLabel": { "$ref": "#/$defs/localized" }, "entrypoint": { "$ref": "#/$defs/path" }, "target": { "const": "windows-x64" },
+    "capabilities": { "$ref": "#/$defs/strings" }, "highlights": { "type": "array", "items": { "$ref": "#/$defs/localized" } }, "publisherTrust": { "enum": ["community", "official"] },
+    "setupMethod": { "$ref": "#/$defs/localized" }, "setup": { "$ref": "#/$defs/setup" }, "provenance": { "$ref": "#/$defs/path" }
+  },
+  "$defs": {
+    "localized": { "type": "object", "additionalProperties": false, "required": ["en", "zh-CN"], "properties": { "en": { "type": "string", "minLength": 1 }, "zh-CN": { "type": "string", "minLength": 1 } } },
+    "strings": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "path": { "type": "string", "pattern": "^[^/\\\\]+(?:[/\\\\][^/\\\\]+)*$" },
+    "args": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "mode": { "type": "object", "additionalProperties": false, "required": ["args"], "properties": { "args": { "$ref": "#/$defs/args" } } },
+    "setup": { "type": "object", "additionalProperties": false, "required": ["args", "add", "startArgs", "env"], "properties": {
+      "args": { "$ref": "#/$defs/args" }, "add": { "$ref": "#/$defs/mode" }, "restore": { "$ref": "#/$defs/mode" }, "startArgs": { "$ref": "#/$defs/args" },
+      "env": { "type": "object", "additionalProperties": { "type": "string" } }
+    } }
+  }
+}

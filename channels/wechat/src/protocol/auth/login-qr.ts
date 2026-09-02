@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 
-import { apiGetFetch, apiPostFetch } from "../api/api.js";
-import { listIndexedWeixinAccountIds, loadWeixinAccount } from "./accounts.js";
+import { apiGetFetch, apiPostFetch, getConfig } from "../api/api.js";
+import { loadWeixinAccount } from "./accounts.js";
 import { logger } from "../util/logger.js";
 import { redactToken } from "../util/redact.js";
 
@@ -18,6 +18,9 @@ type ActiveLogin = {
   currentApiBaseUrl?: string;
   /** 待提交的配对码，用户输入后暂存，下次轮询时携带 */
   pendingVerifyCode?: string;
+  /** Frozen for the whole session so QR refresh cannot change restore identity. */
+  candidate?: QrCandidate;
+  localTokenList: readonly string[];
 };
 
 const ACTIVE_LOGIN_TTL_MS = 5 * 60_000;
@@ -61,26 +64,36 @@ function purgeExpiredLogins(): void {
   }
 }
 
-/** 获取本地已登录账号的 bot token 列表，最多返回最新的 10 个。 */
-function getLocalBotTokenList(): string[] {
-  const accountIds = listIndexedWeixinAccountIds();
-  const tokens: string[] = [];
-  // 从最新注册的账号开始取（列表末尾为最新）
-  for (let i = accountIds.length - 1; i >= 0 && tokens.length < 10; i--) {
-    const data = loadWeixinAccount(accountIds[i]);
-    const token = data?.token?.trim();
-    if (token) {
-      tokens.push(token);
-    }
-  }
-  return tokens;
-}
+export type WeixinQrMode = "add" | "restore";
 
 const QR_START_TIMEOUT_MS = Number.parseInt(process.env.ECHO_WECHAT_QR_START_TIMEOUT_MS ?? "20000", 10);
 
-async function fetchQRCode(apiBaseUrl: string, botType: string, abortSignal?: AbortSignal): Promise<QRCodeResponse> {
+type QrCandidate = {
+  accountId: string;
+  token: string;
+  baseUrl: string;
+  userId: string;
+};
+
+function resolveQrCandidate(mode: WeixinQrMode, accountId?: string): QrCandidate | undefined {
+  if (mode === "add") return undefined;
+  const id = accountId?.trim() ?? "";
+  if (!id) throw new Error("restore requires an account");
+  const data = loadWeixinAccount(id);
+  const token = data?.token?.trim();
+  if (!token) throw new Error(`restore account ${id} has no local token`);
+  const userId = data?.userId?.trim();
+  if (!userId) throw new Error(`restore account ${id} has no local user id`);
+  return { accountId: id, token, baseUrl: data?.baseUrl?.trim() || FIXED_BASE_URL, userId };
+}
+
+async function fetchQRCode(
+  apiBaseUrl: string,
+  botType: string,
+  localTokenList: readonly string[],
+  abortSignal?: AbortSignal,
+): Promise<QRCodeResponse> {
   logger.info(`NewFetching QR code from: ${apiBaseUrl} bot_type=${botType}`);
-  const localTokenList = getLocalBotTokenList();
   logger.info(`newfetchQRCode: local_token_list count=${localTokenList.length}`);
   const rawText = await apiPostFetch({
     baseUrl: apiBaseUrl,
@@ -156,6 +169,21 @@ export async function displayQRCode(qrcodeUrl: string): Promise<void> {
   }
 }
 
+async function checkCandidateHealth(candidate: QrCandidate): Promise<boolean> {
+  try {
+    const response = await getConfig({
+      baseUrl: candidate.baseUrl,
+      token: candidate.token,
+      ilinkUserId: candidate.userId,
+      timeoutMs: 10_000,
+    });
+    return response.ret === 0;
+  } catch {
+    logger.warn(`restore candidate health check failed account=${candidate.accountId}`);
+    return false;
+  }
+}
+
 export type WeixinQrStartResult = {
   qrcodeUrl?: string;
   message: string;
@@ -183,6 +211,7 @@ export async function startWeixinLoginWithQr(opts: {
   verbose?: boolean;
   force?: boolean;
   accountId?: string;
+  mode?: WeixinQrMode;
   apiBaseUrl: string;
   botType?: string;
   abortSignal?: AbortSignal;
@@ -202,9 +231,11 @@ export async function startWeixinLoginWithQr(opts: {
 
   try {
     const botType = opts.botType || DEFAULT_ILINK_BOT_TYPE;
-    logger.info(`Starting Weixin login with bot_type=${botType}`);
+    const candidate = resolveQrCandidate(opts.mode ?? "add", opts.accountId);
+    const localTokenList = candidate ? [candidate.token] : [];
+    logger.info(`Starting Weixin login with bot_type=${botType} mode=${opts.mode ?? "add"}`);
 
-    const qrResponse = await fetchQRCode(FIXED_BASE_URL, botType, opts.abortSignal);
+    const qrResponse = await fetchQRCode(FIXED_BASE_URL, botType, localTokenList, opts.abortSignal);
     logger.info(
       `QR code received, qrcode=${redactToken(qrResponse.qrcode)} imgContentLen=${qrResponse.qrcode_img_content?.length ?? 0}`,
     );
@@ -216,6 +247,8 @@ export async function startWeixinLoginWithQr(opts: {
       qrcode: qrResponse.qrcode,
       qrcodeUrl: qrResponse.qrcode_img_content,
       startedAt: Date.now(),
+      candidate,
+      localTokenList,
     };
 
     activeLogins.set(sessionKey, login);
@@ -254,7 +287,7 @@ async function refreshQRCode(
   if (verbose) process.stdout.write(`\n⏳ 正在刷新二维码...(${qrRefreshCount}/${MAX_QR_REFRESH_COUNT})\n`);
   logger.info(`waitForWeixinLogin: refreshing QR code (${qrRefreshCount}/${MAX_QR_REFRESH_COUNT})`);
   try {
-    const qrResponse = await fetchQRCode(FIXED_BASE_URL, botType);
+    const qrResponse = await fetchQRCode(FIXED_BASE_URL, botType, activeLogin.localTokenList);
     activeLogin.qrcode = qrResponse.qrcode;
     activeLogin.qrcodeUrl = qrResponse.qrcode_img_content;
     activeLogin.startedAt = Date.now();
@@ -419,13 +452,31 @@ export async function waitForWeixinLogin(opts: {
           break;
         }
         case "binded_redirect": {
-          logger.info(`waitForWeixinLogin: binded_redirect received, bot already bound sessionKey=${opts.sessionKey}`);
-          if (opts.verbose) process.stdout.write("\n✅ 已连接过此 OpenClaw，无需重复连接。\n");
+          logger.info(`waitForWeixinLogin: binded_redirect received sessionKey=${opts.sessionKey}`);
+          const candidate = activeLogin.candidate;
+          if (!candidate) {
+            activeLogins.delete(opts.sessionKey);
+            return {
+              connected: false,
+              message: "账号已绑定；新增模式不会复用本地凭据。请对指定账号使用恢复模式。",
+            };
+          }
+          if (!await checkCandidateHealth(candidate)) {
+            activeLogins.delete(opts.sessionKey);
+            return {
+              connected: false,
+              message: "指定账号的本地凭据健康检查失败，不能恢复。",
+            };
+          }
+          if (opts.verbose) process.stdout.write("\n✅ 已恢复指定的微信账号。\n");
           activeLogins.delete(opts.sessionKey);
           return {
-            connected: false,
+            connected: true,
             alreadyConnected: true,
-            message: "已连接过此 OpenClaw，无需重复连接。",
+            botToken: candidate.token,
+            accountId: candidate.accountId,
+            baseUrl: candidate.baseUrl,
+            message: "已恢复指定的微信账号。",
           };
         }
         case "scaned_but_redirect": {

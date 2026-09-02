@@ -3,11 +3,16 @@ import { startWeixinLoginWithQr, waitForWeixinLogin, DEFAULT_ILINK_BOT_TYPE } fr
 import { persistWeixinLogin } from "../protocol/auth/persist-login.js";
 import { startSetupServer, type SetupSnapshot } from "../setup/loopback-server.js";
 
-export type SetupOptions = { echoworkJson: boolean; sessionId: string };
+export type SetupMode = "add" | "restore";
+export type SetupOptions = { echoworkJson: boolean; sessionId: string; mode: SetupMode; account?: string };
 const frame = (value: unknown) => process.stdout.write(`${JSON.stringify(value)}\n`);
 
 export async function runSetup(opts: SetupOptions): Promise<void> {
-  if (!opts.echoworkJson || !opts.sessionId.trim()) throw new Error("setup requires --echowork-json --session-id <id>");
+  const account = opts.account?.trim();
+  if (!opts.echoworkJson || !opts.sessionId.trim() || !["add", "restore"].includes(opts.mode)
+    || (opts.mode === "add" && account !== undefined) || (opts.mode === "restore" && !account)) {
+    throw new Error("setup requires --mode add, or --mode restore --account <id>");
+  }
   const abort = new AbortController();
   let verifyResolve: ((code: string) => void) | undefined;
   let snapshot: SetupSnapshot = { status: "starting", message: "正在生成二维码", qrVersion: 0 };
@@ -20,7 +25,11 @@ export async function runSetup(opts: SetupOptions): Promise<void> {
   process.once("SIGINT", onSignal); process.once("SIGTERM", onSignal);
   try {
     frame({ type:"echowork.channel_setup.ready", version:1, session_id:opts.sessionId, url:server.url });
-    const started = await startWeixinLoginWithQr({ apiBaseUrl:DEFAULT_BASE_URL, botType:DEFAULT_ILINK_BOT_TYPE, force:true, abortSignal:abort.signal });
+    const started = await startWeixinLoginWithQr({
+      apiBaseUrl:DEFAULT_BASE_URL, botType:DEFAULT_ILINK_BOT_TYPE, force:true,
+      mode:opts.mode, accountId:opts.mode === "restore" ? account : undefined,
+      abortSignal:abort.signal,
+    });
     if (!started.qrcodeUrl) throw new Error(started.message);
     snapshot = { status:"wait", message:"请用小号微信扫描二维码", qrUrl:started.qrcodeUrl, qrVersion:1 };
     const result = await waitForWeixinLogin({
@@ -32,9 +41,9 @@ export async function runSetup(opts: SetupOptions): Promise<void> {
     });
     verifyResolve=undefined;
     if (abort.signal.aborted) { snapshot={...snapshot,status:"cancelled",message:"登录已取消"}; process.exitCode=1; return; }
-    if (result.alreadyConnected) throw new Error("账号已绑定但服务未返回可持久化凭据，请先使用 login 恢复凭据");
     if (!result.connected) throw new Error(result.message);
-    const profileId=persistWeixinLogin(result);
+    const profileId = result.alreadyConnected ? result.accountId! : persistWeixinLogin(result);
+    if (opts.mode === "restore" && profileId !== account) throw new Error("恢复结果与指定账号不匹配");
     snapshot={...snapshot,status:"connected",message:"微信已连接"};
     frame({ type:"echowork.channel_setup.complete", version:1, session_id:opts.sessionId, profile_id:profileId });
   } catch (error) {

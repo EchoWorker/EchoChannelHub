@@ -3,15 +3,27 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { artifactManifest, loadChannels, root, validateManifest, validateRepository } from "../src/lib.js";
+import { artifactManifest, channelSemantic, loadChannels, root, validateManifest, validateRepository, validateSetup } from "../src/lib.js";
 import { buildRegistry } from "../src/registry.js";
 
 const channels = loadChannels(root);
 test("generated root manifest exactly matches EchoWork model", () => {
   const value = artifactManifest(channels[0].manifest);
   assert.deepEqual(validateManifest(value), []);
-  assert.deepEqual(Object.keys(value), ["schemaVersion", "publisher", "id", "version", "target", "entrypoint", "protocols"]);
+  assert.deepEqual(Object.keys(value), ["schemaVersion", "publisher", "id", "version", "target", "entrypoint", "protocols", "setup"]);
+  assert.deepEqual(value.setup, channels[0].manifest.setup);
+  assert.notEqual(value.setup, channels[0].manifest.setup);
 });
+test("source setup validates but remains artifact-only", () => {
+  const setup = channels[0].manifest.setup;
+  assert.deepEqual(validateSetup(setup), []);
+  assert.deepEqual(setup.add.args, ["--mode", "add"]);
+  assert.deepEqual(setup.restore.args, ["--mode", "restore", "--account", "{profileId}"]);
+  assert.deepEqual(setup.startArgs, ["start", "--account", "{profileId}"]);
+  assert.equal("setup" in channelSemantic(channels[0].manifest), false);
+  assert.match(validateSetup({ ...setup, add: { args: ["{profileId}"] } })[0], /unsupported placeholder/);
+});
+
 test("repository bilingual semantic metadata validates", () => {
   assert.deepEqual(validateRepository(root), []);
   const m = channels[0].manifest;

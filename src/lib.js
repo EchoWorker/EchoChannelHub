@@ -18,21 +18,49 @@ export const verifySignature = (bytes, signature, publicKeyFile = path.join(root
 const safeRelative = value => typeof value === "string" && value.length > 0 && !path.isAbsolute(value) && !value.split(/[\\/]/).includes("..");
 const semver = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 const idPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const placeholders = value => [...value.matchAll(/\{([^{}]+)\}/g)].map(match => match[1]);
+const setupKeys = ["args", "add", "restore", "startArgs", "env"];
+
+export function validateSetup(value, location = "setup") {
+  const errors = [];
+  if (!value || typeof value !== "object" || Array.isArray(value)) return [`${location}: must be an object`];
+  for (const key of Object.keys(value)) if (!setupKeys.includes(key)) errors.push(`${location}: unknown property ${key}`);
+  for (const key of ["args", "add", "startArgs", "env"]) if (!(key in value)) errors.push(`${location}: missing ${key}`);
+  const checkArgs = (args, at, allowed) => {
+    if (!Array.isArray(args) || args.some(arg => typeof arg !== "string" || !arg || /[\u0000-\u001f\u007f-\u009f]/u.test(arg))) { errors.push(`${at}: non-empty control-free string array required`); return; }
+    for (const arg of args) {
+      const tokens = placeholders(arg);
+      for (const token of tokens) if (!allowed.has(token)) errors.push(`${at}: unsupported placeholder {${token}}`);
+      if ((arg.includes("{") || arg.includes("}")) && (tokens.length !== 1 || arg !== `{${tokens[0]}}`)) errors.push(`${at}: placeholders must occupy a complete argument`);
+    }
+  };
+  checkArgs(value.args, `${location}.args`, new Set(["sessionId"]));
+  for (const mode of ["add", "restore"]) {
+    const spec = value[mode]; if (mode === "restore" && spec === undefined) continue;
+    if (!spec || typeof spec !== "object" || Array.isArray(spec)) { errors.push(`${location}.${mode}: object required`); continue; }
+    for (const key of Object.keys(spec)) if (key !== "args") errors.push(`${location}.${mode}: unknown property ${key}`);
+    if (!("args" in spec)) errors.push(`${location}.${mode}: missing args`);
+    checkArgs(spec.args, `${location}.${mode}.args`, new Set(mode === "restore" ? ["profileId"] : []));
+  }
+  checkArgs(value.startArgs, `${location}.startArgs`, new Set(["profileId"]));
+  if (!value.env || typeof value.env !== "object" || Array.isArray(value.env) || Object.entries(value.env).some(([k,v]) => !/^[A-Za-z_][A-Za-z0-9_]*$/.test(k) || typeof v !== "string" || /[\u0000-\u001f\u007f-\u009f]/u.test(v))) errors.push(`${location}.env: valid control-free string map required`);
+  return errors;
+}
 
 export function validateManifest(value, location = "manifest") {
-  const errors = [], allowed = new Set(["schemaVersion", "publisher", "id", "version", "target", "entrypoint", "protocols"]);
+  const errors = [], allowed = new Set(["schemaVersion", "publisher", "id", "version", "target", "entrypoint", "protocols", "setup"]);
   if (!value || typeof value !== "object" || Array.isArray(value)) return [`${location}: must be an object`];
   for (const key of Object.keys(value)) if (!allowed.has(key)) errors.push(`${location}: unknown property ${key}`);
-  if (value.schemaVersion !== 1) errors.push(`${location}.schemaVersion: must equal 1`);
+  if (value.schemaVersion !== 2) errors.push(`${location}.schemaVersion: must equal 2`);
   if (typeof value.publisher !== "string" || !value.publisher) errors.push(`${location}.publisher: non-empty string required`);
   if (!idPattern.test(value.id ?? "")) errors.push(`${location}.id: invalid kebab-case id`);
   if (!semver.test(value.version ?? "")) errors.push(`${location}.version: invalid SemVer`);
   if (value.target !== TARGET) errors.push(`${location}.target: must equal ${TARGET}`);
   if (!safeRelative(value.entrypoint)) errors.push(`${location}.entrypoint: safe relative path required`);
-  if (!value.protocols || value.protocols.setup !== 1 || value.protocols.start !== 1 || Object.keys(value.protocols ?? {}).some(k => !["setup", "start"].includes(k))) errors.push(`${location}.protocols: setup and start must equal 1`);
+  if (!value.protocols || value.protocols.setup !== 2 || value.protocols.start !== 1 || Object.keys(value.protocols ?? {}).some(k => !["setup", "start"].includes(k))) errors.push(`${location}.protocols: setup must equal 2 and start must equal 1`);
+  errors.push(...validateSetup(value.setup, `${location}.setup`));
   return errors;
 }
-
 export function loadChannels(base = root) {
   const dir = path.join(base, "channels");
   if (!fs.existsSync(dir)) return [];
@@ -41,7 +69,7 @@ export function loadChannels(base = root) {
     return { dir: channelDir, directoryName: e.name, manifestFile, manifest: readJson(manifestFile) };
   }).sort((a, b) => a.manifest.id.localeCompare(b.manifest.id));
 }
-export const artifactManifest = channel => ({ schemaVersion: 1, publisher: channel.publisher, id: channel.id, version: channel.version, target: TARGET, entrypoint: `payload/echo-${channel.id}.cmd`, protocols: { setup: 1, start: 1 } });
+export const artifactManifest = channel => ({ schemaVersion: 2, publisher: channel.publisher, id: channel.id, version: channel.version, target: TARGET, entrypoint: `payload/echo-${channel.id}.cmd`, protocols: { setup: 2, start: 1 }, setup: structuredClone(channel.setup) });
 
 export function validateRepository(base = root) {
   const errors = []; let channels = [];
@@ -49,12 +77,13 @@ export function validateRepository(base = root) {
   const ids = new Set();
   for (const channel of channels) {
     const m = channel.manifest, at = m.id ?? channel.directoryName;
-    const allowed = new Set(["$schema", "schemaVersion", "publisher", "id", "name", "version", "summary", "description", "aliases", "categoryIds", "tagIds", "license", "runtime", "runtimeLabel", "entrypoint", "target", "capabilities", "highlights", "publisherTrust", "setupMethod", "provenance"]);
+    const allowed = new Set(["$schema", "schemaVersion", "publisher", "id", "name", "version", "summary", "description", "aliases", "categoryIds", "tagIds", "license", "runtime", "runtimeLabel", "entrypoint", "target", "capabilities", "highlights", "publisherTrust", "setupMethod", "setup", "provenance"]);
     for (const key of Object.keys(m)) if (!allowed.has(key)) errors.push(`${channel.manifestFile}: unknown property ${key}`);
-    if (m.schemaVersion !== 1 || m.publisher !== PUBLISHER || m.target !== TARGET || m.runtime !== "node") errors.push(`${at}: invalid schemaVersion, publisher, target, or runtime`);
+    if (m.schemaVersion !== 2 || m.publisher !== PUBLISHER || m.target !== TARGET || m.runtime !== "node") errors.push(`${at}: invalid schemaVersion, publisher, target, or runtime`);
     if (!idPattern.test(m.id ?? "") || !semver.test(m.version ?? "")) errors.push(`${channel.directoryName}: invalid id or version`);
     for (const key of ["license", "entrypoint", "provenance"]) if (typeof m[key] !== "string" || !m[key]) errors.push(`${at}.${key}: non-empty string required`);
     validateSemantics(m, at, errors);
+    errors.push(...validateSetup(m.setup, `${at}.setup`));
     if (m.id !== channel.directoryName || ids.has(m.id)) errors.push(`${channel.manifestFile}: id mismatch or duplicate`); ids.add(m.id);
     for (const file of [m.provenance, "package.json", "package-lock.json"]) if (!fs.existsSync(path.join(channel.dir, file))) errors.push(`${at}: missing ${file}`);
     try { if (readJson(path.join(channel.dir, "package.json")).version !== m.version) errors.push(`${at}: package and manifest versions differ`); } catch {}

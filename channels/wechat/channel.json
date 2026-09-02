@@ -1,13 +1,13 @@
 {
-  "$schema": "../../schemas/channel-source-v1.schema.json",
-  "schemaVersion": 1,
+  "$schema": "../../schemas/channel-source-v2.schema.json",
+  "schemaVersion": 2,
   "publisher": "EchoWorker",
   "id": "wechat",
   "name": {
     "en": "WeChat",
     "zh-CN": "微信"
   },
-  "version": "0.1.7",
+  "version": "0.1.8",
   "summary": {
     "en": "WeChat channel for EchoAI.",
     "zh-CN": "EchoAI 微信通道。"
@@ -55,6 +55,34 @@
   "setupMethod": {
     "en": "Guided setup window",
     "zh-CN": "引导式配置窗口"
+  },
+  "setup": {
+    "args": [
+      "setup",
+      "--echowork-json",
+      "--session-id",
+      "{sessionId}"
+    ],
+    "add": {
+      "args": [
+        "--mode",
+        "add"
+      ]
+    },
+    "restore": {
+      "args": [
+        "--mode",
+        "restore",
+        "--account",
+        "{profileId}"
+      ]
+    },
+    "startArgs": [
+      "start",
+      "--account",
+      "{profileId}"
+    ],
+    "env": {}
   },
   "provenance": "MIGRATION.json"
 }
