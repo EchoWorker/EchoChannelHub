@@ -7,7 +7,7 @@
     "en": "WeChat",
     "zh-CN": "微信"
   },
-  "version": "0.1.8",
+  "version": "0.1.9",
   "summary": {
     "en": "WeChat channel for EchoAI.",
     "zh-CN": "EchoAI 微信通道。"

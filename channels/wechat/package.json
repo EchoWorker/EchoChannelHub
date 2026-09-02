@@ -1,6 +1,6 @@
 {
   "name": "@echoworker/echo-wechat",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "WeChat channel for EchoAI — talk to your EchoAI agent from WeChat (text + media).",
   "type": "module",
   "ilink_appid": "bot",
