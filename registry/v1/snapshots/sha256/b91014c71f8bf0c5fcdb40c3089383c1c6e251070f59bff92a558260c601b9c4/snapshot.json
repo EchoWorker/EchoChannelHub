@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "sequence": 20,
-  "generatedAt": "2026-09-03T05:06:15.086Z",
-  "expiresAt": "2026-10-03T05:06:15.086Z",
+  "sequence": 21,
+  "generatedAt": "2026-09-03T07:07:28.979Z",
+  "expiresAt": "2026-10-03T07:07:28.979Z",
   "keyId": "echoworker-prod-2026",
   "testOnly": false,
   "blobs": {
     "catalog": {
-      "sha256": "1477f635b0e0aabaa9adae06cc2f641a9ca0226ddc67b425112ec35031797292",
-      "url": "https://echoworker.github.io/EchoChannelHub/v1/objects/sha256/1477f635b0e0aabaa9adae06cc2f641a9ca0226ddc67b425112ec35031797292/catalog.json",
+      "sha256": "d37a36e69423945d9717a63109b72038a568900e020b63e547950890943bb363",
+      "url": "https://echoworker.github.io/EchoChannelHub/v1/objects/sha256/d37a36e69423945d9717a63109b72038a568900e020b63e547950890943bb363/catalog.json",
       "size": 4323
     },
     "categories": {
@@ -23,7 +23,7 @@
     }
   },
   "changedSet": {
-    "base": "f2e4dc66a674399d9d981e4a7e84273c296859de1b931539bdb4142bc53b92d7",
+    "base": "f927566b316a9c8ff891766fa4ac374b47250c2017c7ede82992bd6ecb911dcf",
     "channels": [
       "qqbot"
     ],

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sequence": 20,
-  "generatedAt": "2026-09-03T05:06:15.086Z",
-  "expiresAt": "2026-10-03T05:06:15.086Z",
+  "sequence": 21,
+  "generatedAt": "2026-09-03T07:07:28.979Z",
+  "expiresAt": "2026-10-03T07:07:28.979Z",
   "channels": [
     {
       "publisher": "EchoWorker",
@@ -61,17 +61,17 @@
       },
       "releases": [
         {
-          "version": "0.1.2",
+          "version": "0.1.3",
           "status": "active",
           "engines": {
             "echowork": ">=0.3.110"
           },
           "artifacts": {
             "windows-x64": {
-              "url": "https://github.com/EchoWorker/EchoChannelHub/releases/download/v0.1.2/qqbot-0.1.2-windows-x64.echochannel",
-              "size": 29459872,
-              "sha256": "52710d9cdd89d890b01996abc0775c6501c0b3677216b263a4b5dc35c1786a95",
-              "signature": "9gKDoGa3zgh+UuCjKK7At1elCurD/dqCcMepYFHUSLZnOBD+5W8U4ohp7r1C7sg0WKaOzOUei9E2dh4WiLHgCA==",
+              "url": "https://github.com/EchoWorker/EchoChannelHub/releases/download/v0.1.3/qqbot-0.1.3-windows-x64.echochannel",
+              "size": 29460268,
+              "sha256": "389efe7099a73ede90e2393d1582d4f9dd81560fd3a4685a8897a510a6540e93",
+              "signature": "h9/shpcONKENtRSq6TyyY2VVFDS3AWsYHY61bxhHhKlKuo46F8iGJ8BlZbPStOI8ZK5YzNREhpfvYAzki8NoDg==",
               "keyId": "echoworker-prod-2026"
             }
           }
