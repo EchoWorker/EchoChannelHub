@@ -1,5 +1,5 @@
 {
-  "$schema": "../../schemas/channel-source-v3.schema.json",
+  "$schema": "../../schemas/channel-source-v2.schema.json",
   "schemaVersion": 2,
   "publisher": "EchoWorker",
   "id": "qqbot",
@@ -88,6 +88,5 @@
     ],
     "env": {}
   },
-  "provenance": "MIGRATION.json",
-  "": "../../schemas/channel-source-v2.schema.json"
+  "provenance": "MIGRATION.json"
 }
