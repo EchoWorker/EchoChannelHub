@@ -58,13 +58,13 @@ export function validateManifest(value, location = "manifest") {
   const errors = [], allowed = new Set(["schemaVersion", "publisher", "id", "version", "target", "entrypoint", "entrypointArgs", "protocols", "setup"]);
   if (!value || typeof value !== "object" || Array.isArray(value)) return [`${location}: must be an object`];
   for (const key of Object.keys(value)) if (!allowed.has(key)) errors.push(`${location}: unknown property ${key}`);
-  if (value.schemaVersion !== 3) errors.push(`${location}.schemaVersion: must equal 3`);
+  if (![2, 3].includes(value.schemaVersion)) errors.push(`${location}.schemaVersion: must equal 2 or 3`);
   if (typeof value.publisher !== "string" || !value.publisher) errors.push(`${location}.publisher: non-empty string required`);
   if (!idPattern.test(value.id ?? "")) errors.push(`${location}.id: invalid kebab-case id`);
   if (!semver.test(value.version ?? "")) errors.push(`${location}.version: invalid SemVer`);
   if (value.target !== TARGET) errors.push(`${location}.target: must equal ${TARGET}`);
   if (!safeRelative(value.entrypoint)) errors.push(`${location}.entrypoint: safe relative path required`);
-  if (!Array.isArray(value.entrypointArgs) || value.entrypointArgs.some((arg, index) => !validEntrypointArg(arg, index))) errors.push(`${location}.entrypointArgs: invalid argument or unsafe path`);
+  if (value.schemaVersion === 3 && (!Array.isArray(value.entrypointArgs) || value.entrypointArgs.some((arg, index) => !validEntrypointArg(arg, index)))) errors.push(`${location}.entrypointArgs: invalid argument or unsafe path`);
   if (!value.protocols || value.protocols.setup !== 2 || value.protocols.start !== 1 || Object.keys(value.protocols ?? {}).some(k => !["setup", "start"].includes(k))) errors.push(`${location}.protocols: setup must equal 2 and start must equal 1`);
   errors.push(...validateSetup(value.setup, `${location}.setup`));
   return errors;

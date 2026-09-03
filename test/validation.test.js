@@ -40,7 +40,7 @@ test("source setup validates but remains artifact-only", () => {
     assert.match(validateRepository(sourceDir).join("\n"), /entrypointArgs/, invalid);
   }
   fs.rmSync(sourceDir, { recursive: true, force: true });
-  assert.match(validateManifest({ ...artifactManifest(wechat.manifest), schemaVersion: 2 })[0], /must equal 3/);
+  assert.match(validateManifest({ ...artifactManifest(wechat.manifest), schemaVersion: 1 })[0], /must equal 2 or 3/);
   assert.equal("setup" in channelSemantic(wechat.manifest), false);
   assert.match(validateSetup({ ...setup, add: { args: ["{profileId}"] } })[0], /unsupported placeholder/);
 });
