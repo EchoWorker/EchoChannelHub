@@ -6,10 +6,11 @@ import os from "node:os";
 import path from "node:path";
 import http from "node:http";
 
-function post(url: URL, body: unknown): Promise<number> {
+function post(url: URL, body: unknown, route = "verify"): Promise<number> {
+  const target = new URL(`${url.href.replace(/\/$/, "")}/${route}`);
   return new Promise((resolve, reject) => {
     const bytes = Buffer.from(JSON.stringify(body));
-    const req = http.request({ hostname: "127.0.0.1", port: url.port, path: url.pathname, method: "POST", headers: { Host: url.host, "Content-Type": "application/json", "Content-Length": String(bytes.length) } }, (res) => { res.resume(); res.on("end", () => resolve(res.statusCode ?? 0)); });
+    const req = http.request({ hostname: "127.0.0.1", port: target.port, path: target.pathname, method: "POST", headers: { Host: target.host, "Content-Type": "application/json", "Content-Length": String(bytes.length) } }, (res) => { res.resume(); res.on("end", () => resolve(res.statusCode ?? 0)); });
     req.on("error", reject); req.end(bytes);
   });
 }
@@ -40,6 +41,26 @@ test("CLI setup add and restore emit protocol frames without leaking the secret"
   assert.equal(await new Promise<number | null>((resolve) => restore.once("exit", resolve)), 0);
   assert.equal((JSON.parse(restored) as {profile_id:string}).profile_id, profileId);
   assert.doesNotMatch(restored, /process-secret/);
+});
+
+test("CLI setup cancel endpoint terminates with a non-zero exit", async () => {
+  const state = fs.mkdtempSync(path.join(os.tmpdir(), "qq-cli-cancel-"));
+  const env = { ...process.env, ECHO_QQBOT_STATE_DIR: state };
+  const child = spawn(process.execPath, [path.resolve("dist/cli.js"), "setup", "--echowork-json", "--session-id", "cancel", "--mode", "add"], { cwd: path.resolve("."), env, stdio: ["ignore", "pipe", "pipe"] });
+  let stdout = "", submitted = false;
+  child.stdout.on("data", (chunk) => {
+    stdout += chunk;
+    const line = stdout.split("\n").find((entry) => entry.includes("channel_setup.ready"));
+    if (line && !submitted) {
+      submitted = true;
+      void post(new URL((JSON.parse(line) as { url: string }).url), {}, "cancel").then((status) => assert.equal(status, 204));
+    }
+  });
+  const code = await new Promise<number | null>((resolve) => child.once("exit", resolve));
+  assert.equal(code, 1);
+  assert.match(stdout, /channel_setup.ready/);
+  assert.equal(fs.existsSync(path.join(state, "profiles")), false);
+  fs.rmSync(state, { recursive: true, force: true });
 });
 
 test("CLI rejects duplicate and unknown flags", async () => {

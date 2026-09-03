@@ -43,24 +43,36 @@ async function readBody(req: IncomingMessage): Promise<Record<string, unknown>> 
   return value as Record<string, unknown>;
 }
 
-export async function startSetupServer(onSubmit: (credentials: SetupCredentials) => void | Promise<void>): Promise<SetupServer> {
-  const capabilityPath = `/setup/${randomBytes(32).toString("base64url")}`;
+export async function startSetupServer(
+  onSubmit: (credentials: SetupCredentials) => void | Promise<void>,
+  onCancel: () => void = () => undefined,
+): Promise<SetupServer> {
+  const prefix = `/setup/${randomBytes(32).toString("base64url")}`;
   let expectedHost = "";
   const server = http.createServer(async (req, res) => {
     try {
       if (!exactHost(req, expectedHost)) return send(res, 400, "Bad request");
       const url = new URL(req.url ?? "/", "http://127.0.0.1");
-      if (url.pathname !== capabilityPath || url.search) return send(res, 404, "Not found");
-      if (req.method === "GET") {
+      if (!url.pathname.startsWith(prefix) || (url.pathname !== prefix && !url.pathname.startsWith(`${prefix}/`)) || url.search) return send(res, 404, "Not found");
+      const route = url.pathname.slice(prefix.length) || "/";
+      const allowedMethod = route === "/verify" || route === "/cancel" ? "POST" : "GET";
+      if (!["/", "/status", "/verify", "/cancel"].includes(route)) return send(res, 404, "Not found");
+      if (req.method !== allowedMethod) {
+        res.writeHead(405, { ...headers, "Content-Type": "text/plain; charset=utf-8", Allow: allowedMethod });
+        return res.end("Method not allowed");
+      }
+      if (req.method === "GET" && route === "/") {
         res.writeHead(200, { ...headers, "Content-Type": "text/html; charset=utf-8" });
         return res.end(renderSetupPage());
       }
-      if (req.method !== "POST") {
-        res.writeHead(405, { ...headers, "Content-Type": "text/plain; charset=utf-8", Allow: "GET, POST" });
-        return res.end("Method not allowed");
-      }
+      if (req.method === "GET" && route === "/status") return send(res, 200, "ready");
       if (req.headers["content-type"] !== "application/json") return send(res, 415, "JSON required");
       const body = await readBody(req);
+      if (route === "/cancel") {
+        if (Object.keys(body).length) return send(res, 400, "Invalid body");
+        onCancel();
+        return send(res, 204, "");
+      }
       const keys = Object.keys(body).sort();
       if (keys.join(",") !== "appId,appSecret" || typeof body.appId !== "string" || typeof body.appSecret !== "string") {
         return send(res, 400, "Invalid body");
@@ -80,7 +92,7 @@ export async function startSetupServer(onSubmit: (credentials: SetupCredentials)
   if (!address || typeof address === "string") throw new Error("Loopback listen failed");
   expectedHost = `127.0.0.1:${address.port}`;
   return {
-    url: `http://${expectedHost}${capabilityPath}`,
+    url: `http://${expectedHost}${prefix}`,
     close: () => new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve())),
   };
 }

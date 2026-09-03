@@ -34,7 +34,7 @@ export async function runSetup(options: SetupOptions): Promise<string> {
     const profile = saveProfile(appId, appSecret);
     submitted = true;
     resolveResult(profile.profileId);
-  });
+  }, () => rejectResult(new Error("Setup cancelled")));
   const onAbort = () => rejectResult(new Error("Setup cancelled"));
   options.signal?.addEventListener("abort", onAbort, { once: true });
   try {

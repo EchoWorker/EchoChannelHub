@@ -17,6 +17,6 @@ test("copyDirectoryContents copies compiled output without nesting", () => {
   copyDirectoryContents(source, destination);
   assert.equal(fs.readFileSync(path.join(destination, "cli.js"), "utf8"), "entrypoint");
   assert.equal(fs.readFileSync(path.join(destination, "runtime", "helper.js"), "utf8"), "helper");
-  assert.equal(fs.readFileSync(path.join(destination, "tests", "cli.test.js"), "utf8"), "test");
+  assert.equal(fs.existsSync(path.join(destination, "tests")), false);
   fs.rmSync(root, { recursive: true, force: true });
 });

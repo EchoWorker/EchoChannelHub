@@ -53,15 +53,20 @@ test("loopback setup uses a capability URL and strict HTTP protections", async (
     }
     assert.equal((await request(url, { host: `127.0.0.1:${url.port}` })).status, 200);
 
+    const verifyUrl = new URL(`${server.url}/verify`);
+    const statusUrl = new URL(`${server.url}/status`);
+    const cancelUrl = new URL(`${server.url}/cancel`);
+    assert.equal((await request(statusUrl, { host: `127.0.0.1:${url.port}` })).status, 200);
+    assert.equal((await request(cancelUrl, { method: "POST", type: "application/json", body: "{}" })).status, 204);
     for (const type of [undefined, "text/plain", "application/json; charset=utf-8", "Application/JSON"]) {
-      assert.equal((await request(url, { method: "POST", type, body: "{}" })).status, 415);
+      assert.equal((await request(verifyUrl, { method: "POST", type, body: "{}" })).status, 415);
     }
     for (const body of ["", "null", "[]", "{}", "{", '{"appId":"1"}', '{"appId":"1","appSecret":"s","extra":1}']) {
-      assert.equal((await request(url, { method: "POST", type: "application/json", body })).status, 400);
+      assert.equal((await request(verifyUrl, { method: "POST", type: "application/json", body })).status, 400);
     }
-    assert.equal((await request(url, { method: "POST", type: "application/json", body: " ".repeat(4097) })).status, 400);
+    assert.equal((await request(verifyUrl, { method: "POST", type: "application/json", body: " ".repeat(4097) })).status, 400);
     const secret = "test-secret-value";
-    const valid = await request(url, { method: "POST", type: "application/json", body: JSON.stringify({ appId: "123456", appSecret: secret }) });
+    const valid = await request(verifyUrl, { method: "POST", type: "application/json", body: JSON.stringify({ appId: "123456", appSecret: secret }) });
     assert.equal(valid.status, 204);
     assert.doesNotMatch(valid.body, new RegExp(secret));
     assert.deepEqual(received, [{ appId: "123456", appSecret: secret }]);
