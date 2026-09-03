@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "sequence": 17,
+  "generatedAt": "2026-09-03T02:37:31.756Z",
+  "expiresAt": "2026-10-03T02:37:31.756Z",
+  "channels": [
+    {
+      "publisher": "EchoWorker",
+      "id": "qqbot",
+      "name": {
+        "en": "QQ Bot",
+        "zh-CN": "QQ 机器人"
+      },
+      "summary": {
+        "en": "Official QQ Bot channel for EchoAI.",
+        "zh-CN": "EchoAI 官方 QQ 机器人通道。"
+      },
+      "description": {
+        "en": "Connect EchoAI to QQ private and group chats through the official QQ Bot API, with text and image messaging.",
+        "zh-CN": "通过 QQ 官方机器人 API 将 EchoAI 接入 QQ 私聊和群聊，收发文本与图片。"
+      },
+      "aliases": [
+        "qq",
+        "qqbot"
+      ],
+      "categoryIds": [
+        "messaging"
+      ],
+      "tagIds": [
+        "direct-message",
+        "media",
+        "multi-account"
+      ],
+      "capabilities": [
+        "media",
+        "receive",
+        "send"
+      ],
+      "highlights": [
+        {
+          "en": "Official QQ Bot API",
+          "zh-CN": "QQ 官方机器人 API"
+        },
+        {
+          "en": "Private and @-mentioned group chat",
+          "zh-CN": "私聊和群聊 @ 触发"
+        },
+        {
+          "en": "Text and image messaging",
+          "zh-CN": "文本和图片消息"
+        }
+      ],
+      "publisherTrust": "official",
+      "setupMethod": {
+        "en": "Guided AppID and AppSecret setup",
+        "zh-CN": "引导式 AppID 和 AppSecret 配置"
+      },
+      "runtime": {
+        "en": "Bundled Node.js runtime",
+        "zh-CN": "内置 Node.js 运行时"
+      },
+      "releases": [
+        {
+          "version": "0.1.0",
+          "status": "active",
+          "engines": {
+            "echowork": ">=0.1.0"
+          },
+          "artifacts": {
+            "windows-x64": {
+              "url": "https://github.com/EchoWorker/EchoChannelHub/releases/download/v0.1.0/qqbot-0.1.0-windows-x64.echochannel",
+              "size": 29410753,
+              "sha256": "b67579a23c23b4a9bb55603d186996cc58e9cd82b7978869b8b4cd81c877c4d1",
+              "signature": "2rMGk0ksxbOaQcZfbg3Op+kVrlgzd2I5fIWYOTYodvKnLvAM8Y4dsLWgSB6+pdGiqjb59FGNrgX6MEmGvrVwAg==",
+              "keyId": "echoworker-prod-2026"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "publisher": "EchoWorker",
+      "id": "wechat",
+      "name": {
+        "en": "WeChat",
+        "zh-CN": "微信"
+      },
+      "summary": {
+        "en": "WeChat channel for EchoAI.",
+        "zh-CN": "EchoAI 微信通道。"
+      },
+      "description": {
+        "en": "Connect EchoAI to WeChat through guided QR-code setup and exchange text, images, and audio.",
+        "zh-CN": "通过二维码引导配置将 EchoAI 连接到微信，并收发文本、图片和音频。"
+      },
+      "aliases": [
+        "wechat",
+        "wx"
+      ],
+      "categoryIds": [
+        "messaging"
+      ],
+      "tagIds": [
+        "direct-message",
+        "media",
+        "multi-account"
+      ],
+      "capabilities": [
+        "media",
+        "receive",
+        "send"
+      ],
+      "highlights": [
+        {
+          "en": "Guided QR-code setup",
+          "zh-CN": "二维码引导配置"
+        },
+        {
+          "en": "Text, image, and audio messaging",
+          "zh-CN": "文本、图片和音频消息"
+        }
+      ],
+      "publisherTrust": "official",
+      "setupMethod": {
+        "en": "Guided setup window",
+        "zh-CN": "引导式配置窗口"
+      },
+      "runtime": {
+        "en": "Bundled Node.js runtime",
+        "zh-CN": "内置 Node.js 运行时"
+      },
+      "releases": [
+        {
+          "version": "0.1.10",
+          "status": "active",
+          "engines": {
+            "echowork": ">=0.1.0"
+          },
+          "artifacts": {
+            "windows-x64": {
+              "url": "https://github.com/EchoWorker/EchoChannelHub/releases/download/v0.1.10/wechat-0.1.10-windows-x64.echochannel",
+              "size": 29856301,
+              "sha256": "283a3e87fb7ffbf303a1bfc303f622a0f3d11ea220d0a6a36a8c05e43386a70e",
+              "signature": "A47p2UTksQqTe4kdYVs1+Ls3XMoKUSW8REWRm1M9rVFFvi0Fo38saiL403F8nCeSioG1cnT6Zvh1d6cJCl9mDQ==",
+              "keyId": "echoworker-prod-2026"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
