@@ -40,8 +40,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: v${{ inputs.version }}
         run: |
-          gh release create "$env:TAG" --draft --title "${{ inputs.channel }} ${{ inputs.version }}" --notes "Approved production release. Signed with echoworker-prod-2026."
-          gh release upload "$env:TAG" "artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel" "artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel.json"
+          if (gh release view "$env:TAG" --json isDraft 2>$null) {
+            gh release upload "$env:TAG" "artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel" "artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel.json" --clobber
+          } else {
+            gh release create "$env:TAG" --draft --title "${{ inputs.channel }} ${{ inputs.version }}" --notes "Approved production release. Signed with echoworker-prod-2026."
+            gh release upload "$env:TAG" "artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel" "artifacts/${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel.json"
+          }
           $assetName = "${{ inputs.channel }}-${{ inputs.version }}-windows-x64.echochannel"
           $metaPath = "artifacts/$assetName.json"
           $meta = Get-Content $metaPath | ConvertFrom-Json
