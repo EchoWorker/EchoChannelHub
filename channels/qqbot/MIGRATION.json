@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "migratedAt": "2026-09-02",
+  "source": {
+    "repository": "https://github.com/tencent-connect/openclaw-qqbot.git",
+    "path": ".",
+    "ref": "a4479eea5931afdd3d504ac3b1c0860025c4d171",
+    "license": "MIT"
+  },
+  "destination": "channels/qqbot",
+  "excluded": ["OpenClaw runtime adapters", "OpenClaw tools and commands", "Webhook host adapter", "@tencent-connect/qqbot-connector", "node_modules", "dist"],
+  "note": "QQ protocol access uses the MIT @tencent-connect/qqbot-nodejs SDK. EchoWork setup v2, EchoAI gateway bridge, profiles, routing and reliability policies are independently adapted for EchoChannelHub."
+}

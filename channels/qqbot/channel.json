@@ -1,0 +1,95 @@
+{
+  "$schema": "../../schemas/channel-source-v3.schema.json",
+  "schemaVersion": 3,
+  "publisher": "EchoWorker",
+  "id": "qqbot",
+  "name": {
+    "en": "QQ Bot",
+    "zh-CN": "QQ 机器人"
+  },
+  "version": "0.1.0",
+  "summary": {
+    "en": "Official QQ Bot channel for EchoAI.",
+    "zh-CN": "EchoAI 官方 QQ 机器人通道。"
+  },
+  "description": {
+    "en": "Connect EchoAI to QQ private and group chats through the official QQ Bot API, with text and image messaging.",
+    "zh-CN": "通过 QQ 官方机器人 API 将 EchoAI 接入 QQ 私聊和群聊，收发文本与图片。"
+  },
+  "aliases": [
+    "qq",
+    "qqbot"
+  ],
+  "categoryIds": [
+    "messaging"
+  ],
+  "tagIds": [
+    "direct-message",
+    "media",
+    "multi-account"
+  ],
+  "license": "MIT",
+  "runtime": "node",
+  "runtimeLabel": {
+    "en": "Bundled Node.js runtime",
+    "zh-CN": "内置 Node.js 运行时"
+  },
+  "entrypoint": "runtime/node.exe",
+  "target": "windows-x64",
+  "capabilities": [
+    "media",
+    "receive",
+    "send"
+  ],
+  "highlights": [
+    {
+      "en": "Official QQ Bot API",
+      "zh-CN": "QQ 官方机器人 API"
+    },
+    {
+      "en": "Private and @-mentioned group chat",
+      "zh-CN": "私聊和群聊 @ 触发"
+    },
+    {
+      "en": "Text and image messaging",
+      "zh-CN": "文本和图片消息"
+    }
+  ],
+  "publisherTrust": "official",
+  "setupMethod": {
+    "en": "Guided AppID and AppSecret setup",
+    "zh-CN": "引导式 AppID 和 AppSecret 配置"
+  },
+  "setup": {
+    "args": [
+      "setup",
+      "--echowork-json",
+      "--session-id",
+      "{sessionId}"
+    ],
+    "add": {
+      "args": [
+        "--mode",
+        "add"
+      ]
+    },
+    "restore": {
+      "args": [
+        "--mode",
+        "restore",
+        "--account",
+        "{profileId}"
+      ]
+    },
+    "startArgs": [
+      "start",
+      "--account",
+      "{profileId}"
+    ],
+    "env": {}
+  },
+  "provenance": "MIGRATION.json",
+  "entrypointArgs": [
+    "app/dist/cli.js"
+  ]
+}

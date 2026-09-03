@@ -1,0 +1,26 @@
+{
+  "name": "@echoworker/echo-qqbot",
+  "version": "0.1.0",
+  "description": "Official QQ Bot channel for EchoAI.",
+  "type": "module",
+  "bin": { "echo-qqbot": "dist/cli.js" },
+  "main": "dist/cli.js",
+  "files": ["dist/**/*.js", "dist/**/*.js.map", "README.md", "LICENSE", "NOTICE.md"],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test dist/tests/*.test.js"
+  },
+  "engines": { "node": ">=20" },
+  "author": "EchoWorker",
+  "license": "MIT",
+  "dependencies": {
+    "@tencent-connect/qqbot-nodejs": "1.0.4",
+    "ws": "8.21.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.5.12",
+    "typescript": "^5.6.0"
+  }
+}
