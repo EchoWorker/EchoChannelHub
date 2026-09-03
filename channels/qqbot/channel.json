@@ -1,13 +1,13 @@
 {
-  "$schema": "../../schemas/channel-source-v2.schema.json",
-  "schemaVersion": 2,
+  "$schema": "../../schemas/channel-source-v3.schema.json",
+  "schemaVersion": 3,
   "publisher": "EchoWorker",
   "id": "qqbot",
   "name": {
     "en": "QQ Bot",
     "zh-CN": "QQ 机器人"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "summary": {
     "en": "Official QQ Bot channel for EchoAI.",
     "zh-CN": "EchoAI 官方 QQ 机器人通道。"
@@ -34,7 +34,7 @@
     "en": "Bundled Node.js runtime",
     "zh-CN": "内置 Node.js 运行时"
   },
-  "entrypoint": "dist/cli.js",
+  "entrypoint": "runtime/node.exe",
   "target": "windows-x64",
   "capabilities": [
     "media",
@@ -88,5 +88,8 @@
     ],
     "env": {}
   },
-  "provenance": "MIGRATION.json"
+  "provenance": "MIGRATION.json",
+  "entrypointArgs": [
+    "app/dist/cli.js"
+  ]
 }
