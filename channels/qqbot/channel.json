@@ -1,20 +1,20 @@
 {
-  "$schema": "../../schemas/channel-source-v2.schema.json",
+  "$schema": "../../schemas/channel-source-v3.schema.json",
   "schemaVersion": 2,
   "publisher": "EchoWorker",
   "id": "qqbot",
   "name": {
     "en": "QQ Bot",
-    "zh-CN": "QQ µ£║σÖ¿Σ║║"
+    "zh-CN": "QQ 机器人"
   },
   "version": "0.1.0",
   "summary": {
     "en": "Official QQ Bot channel for EchoAI.",
-    "zh-CN": "EchoAI σ«ÿµû╣ QQ µ£║σÖ¿Σ║║ΘÇÜΘüôπÇé"
+    "zh-CN": "EchoAI 官方 QQ 机器人通道。"
   },
   "description": {
     "en": "Connect EchoAI to QQ private and group chats through the official QQ Bot API, with text and image messaging.",
-    "zh-CN": "ΘÇÜΦ┐ç QQ σ«ÿµû╣µ£║σÖ¿Σ║║ API σ░å EchoAI µÄÑσàÑ QQ τºüΦüèσÆîτ╛ñΦüè∩╝îµö╢σÅæµûçµ£¼Σ╕Äσ¢╛τëçπÇé"
+    "zh-CN": "通过 QQ 官方机器人 API 将 EchoAI 接入 QQ 私聊和群聊，收发文本与图片。"
   },
   "aliases": [
     "qq",
@@ -32,7 +32,7 @@
   "runtime": "node",
   "runtimeLabel": {
     "en": "Bundled Node.js runtime",
-    "zh-CN": "σåàτ╜« Node.js Φ┐ÉΦíîµù╢"
+    "zh-CN": "内置 Node.js 运行时"
   },
   "entrypoint": "dist/cli.js",
   "target": "windows-x64",
@@ -44,21 +44,21 @@
   "highlights": [
     {
       "en": "Official QQ Bot API",
-      "zh-CN": "QQ σ«ÿµû╣µ£║σÖ¿Σ║║ API"
+      "zh-CN": "QQ 官方机器人 API"
     },
     {
       "en": "Private and @-mentioned group chat",
-      "zh-CN": "τºüΦüèσÆîτ╛ñΦüè @ ΦºªσÅæ"
+      "zh-CN": "私聊和群聊 @ 触发"
     },
     {
       "en": "Text and image messaging",
-      "zh-CN": "µûçµ£¼σÆîσ¢╛τëçµ╢êµü»"
+      "zh-CN": "文本和图片消息"
     }
   ],
   "publisherTrust": "official",
   "setupMethod": {
     "en": "Guided AppID and AppSecret setup",
-    "zh-CN": "σ╝òσ»╝σ╝Å AppID σÆî AppSecret Θàìτ╜«"
+    "zh-CN": "引导式 AppID 和 AppSecret 配置"
   },
   "setup": {
     "args": [
@@ -88,5 +88,6 @@
     ],
     "env": {}
   },
-  "provenance": "MIGRATION.json"
+  "provenance": "MIGRATION.json",
+  "": "../../schemas/channel-source-v2.schema.json"
 }
