@@ -77,7 +77,9 @@ export function loadChannels(base = root) {
     return { dir: channelDir, directoryName: e.name, manifestFile, manifest: readJson(manifestFile) };
   }).sort((a, b) => a.manifest.id.localeCompare(b.manifest.id));
 }
-export const artifactManifest = channel => ({ schemaVersion: 3, publisher: channel.publisher, id: channel.id, version: channel.version, target: TARGET, entrypoint: `payload/${slash(channel.entrypoint)}`, entrypointArgs: channel.entrypointArgs.map((arg, index) => isPathLikeEntrypointArg(arg, index) && safeRelative(arg) ? `payload/${slash(arg)}` : arg), protocols: { setup: 2, start: 1 }, setup: structuredClone(channel.setup) });
+export const artifactManifest = channel => channel.schemaVersion === 3
+  ? ({ schemaVersion: 3, publisher: channel.publisher, id: channel.id, version: channel.version, target: TARGET, entrypoint: `payload/${slash(channel.entrypoint)}`, entrypointArgs: channel.entrypointArgs.map((arg, index) => isPathLikeEntrypointArg(arg, index) && safeRelative(arg) ? `payload/${slash(arg)}` : arg), protocols: { setup: 2, start: 1 }, setup: structuredClone(channel.setup) })
+  : ({ schemaVersion: 2, publisher: channel.publisher, id: channel.id, version: channel.version, target: TARGET, entrypoint: `payload/echo-${channel.id}.cmd`, protocols: { setup: 2, start: 1 }, setup: structuredClone(channel.setup) });
 
 export function validateRepository(base = root) {
   const errors = []; let channels = [];
@@ -87,10 +89,10 @@ export function validateRepository(base = root) {
     const m = channel.manifest, at = m.id ?? channel.directoryName;
     const allowed = new Set(["$schema", "schemaVersion", "publisher", "id", "name", "version", "summary", "description", "aliases", "categoryIds", "tagIds", "license", "runtime", "runtimeLabel", "entrypoint", "entrypointArgs", "target", "capabilities", "highlights", "publisherTrust", "setupMethod", "setup", "provenance"]);
     for (const key of Object.keys(m)) if (!allowed.has(key)) errors.push(`${channel.manifestFile}: unknown property ${key}`);
-    if (m.schemaVersion !== 3 || m.publisher !== PUBLISHER || m.target !== TARGET || m.runtime !== "node") errors.push(`${at}: invalid schemaVersion, publisher, target, or runtime`);
+    if (![2, 3].includes(m.schemaVersion) || m.publisher !== PUBLISHER || m.target !== TARGET || m.runtime !== "node") errors.push(`${at}: invalid schemaVersion, publisher, target, or runtime`);
     if (!idPattern.test(m.id ?? "") || !semver.test(m.version ?? "")) errors.push(`${channel.directoryName}: invalid id or version`);
     for (const key of ["license", "entrypoint", "provenance"]) if (typeof m[key] !== "string" || !m[key]) errors.push(`${at}.${key}: non-empty string required`);
-    if (!safeRelative(m.entrypoint) || !Array.isArray(m.entrypointArgs) || m.entrypointArgs.some((arg, index) => !validEntrypointArg(arg, index))) errors.push(`${at}: invalid entrypoint or entrypointArgs`);
+    if (!safeRelative(m.entrypoint) || (m.schemaVersion === 3 && (!Array.isArray(m.entrypointArgs) || m.entrypointArgs.some((arg, index) => !validEntrypointArg(arg, index))))) errors.push(`${at}: invalid entrypoint or entrypointArgs`);
     validateSemantics(m, at, errors);
     errors.push(...validateSetup(m.setup, `${at}.setup`));
     if (m.id !== channel.directoryName || ids.has(m.id)) errors.push(`${channel.manifestFile}: id mismatch or duplicate`); ids.add(m.id);
