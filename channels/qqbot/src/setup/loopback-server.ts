@@ -46,6 +46,7 @@ async function readBody(req: IncomingMessage): Promise<Record<string, unknown>> 
 export async function startSetupServer(
   onSubmit: (credentials: SetupCredentials) => void | Promise<void>,
   onCancel: () => void = () => undefined,
+  onAccepted: () => void = () => undefined,
 ): Promise<SetupServer> {
   const prefix = `/setup/${randomBytes(32).toString("base64url")}`;
   let expectedHost = "";
@@ -78,8 +79,10 @@ export async function startSetupServer(
         return send(res, 400, "Invalid body");
       }
       await onSubmit({ appId: body.appId, appSecret: body.appSecret });
-      res.writeHead(204, headers);
-      return res.end();
+      res.writeHead(204, { ...headers, Connection: "close" });
+      res.end();
+      res.once("finish", onAccepted);
+      return;
     } catch {
       return send(res, 400, "Bad request");
     }
@@ -93,6 +96,10 @@ export async function startSetupServer(
   expectedHost = `127.0.0.1:${address.port}`;
   return {
     url: `http://${expectedHost}${prefix}`,
-    close: () => new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve())),
+    close: () => new Promise((resolve, reject) => {
+      server.closeIdleConnections();
+      server.close((error) => error ? reject(error) : resolve());
+      server.closeAllConnections();
+    }),
   };
 }

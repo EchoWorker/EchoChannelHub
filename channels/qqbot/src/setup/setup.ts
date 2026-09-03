@@ -29,17 +29,23 @@ export async function runSetup(options: SetupOptions): Promise<string> {
   let rejectResult!: (error: Error) => void;
   const result = new Promise<string>((resolve, reject) => { resolveResult = resolve; rejectResult = reject; });
   let submitted = false;
+  let accepted = false;
+  let resolveAccepted!: () => void;
+  const responseAccepted = new Promise<void>((resolve) => { resolveAccepted = resolve; });
   const server = await startSetupServer(({ appId, appSecret }) => {
     if (submitted) throw new Error("Setup already submitted");
     const profile = saveProfile(appId, appSecret);
     submitted = true;
     resolveResult(profile.profileId);
-  }, () => rejectResult(new Error("Setup cancelled")));
+  }, () => rejectResult(new Error("Setup cancelled")), () => {
+    if (!accepted) { accepted = true; resolveAccepted(); }
+  });
   const onAbort = () => rejectResult(new Error("Setup cancelled"));
   options.signal?.addEventListener("abort", onAbort, { once: true });
   try {
     write({ type: "echowork.channel_setup.ready", version: 1, session_id: sessionId, url: server.url });
     const profileId = await result;
+    await responseAccepted;
     write({ type: "echowork.channel_setup.complete", version: 1, session_id: sessionId, profile_id: profileId });
     return profileId;
   } finally {

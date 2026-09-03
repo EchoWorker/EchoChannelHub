@@ -6,11 +6,11 @@ import os from "node:os";
 import path from "node:path";
 import http from "node:http";
 
-function post(url: URL, body: unknown, route = "verify"): Promise<number> {
+function post(url: URL, body: unknown, route = "verify"): Promise<{ status: number; completedAt: number }> {
   const target = new URL(`${url.href.replace(/\/$/, "")}/${route}`);
   return new Promise((resolve, reject) => {
     const bytes = Buffer.from(JSON.stringify(body));
-    const req = http.request({ hostname: "127.0.0.1", port: target.port, path: target.pathname, method: "POST", headers: { Host: target.host, "Content-Type": "application/json", "Content-Length": String(bytes.length) } }, (res) => { res.resume(); res.on("end", () => resolve(res.statusCode ?? 0)); });
+    const req = http.request({ hostname: "127.0.0.1", port: target.port, path: target.pathname, method: "POST", headers: { Host: target.host, "Content-Type": "application/json", "Content-Length": String(bytes.length) } }, (res) => { res.resume(); res.on("end", () => resolve({ status: res.statusCode ?? 0, completedAt: Date.now() })); });
     req.on("error", reject); req.end(bytes);
   });
 }
@@ -20,7 +20,7 @@ test("CLI setup add and restore emit protocol frames without leaking the secret"
   t.after(() => fs.rmSync(state, { recursive: true, force: true }));
   const env = { ...process.env, ECHO_QQBOT_STATE_DIR: state };
   const child = spawn(process.execPath, [path.resolve("dist/cli.js"), "setup", "--echowork-json", "--session-id", "test", "--mode", "add"], { cwd: path.resolve("."), env, stdio: ["ignore", "pipe", "pipe"] });
-  let stdout = "", stderr = "", submitted = false;
+  let stdout = "", stderr = "", submitted = false, responseCompletedAt = 0;
   child.stderr.on("data", (chunk) => { stderr += chunk; });
   child.stdout.on("data", (chunk) => {
     stdout += chunk;
@@ -28,11 +28,12 @@ test("CLI setup add and restore emit protocol frames without leaking the secret"
     if (line && !submitted) {
       submitted = true;
       const ready = JSON.parse(line) as { url: string };
-      void post(new URL(ready.url), { appId: "123456", appSecret: "process-secret" }).then((status) => assert.equal(status, 204));
+      void post(new URL(ready.url), { appId: "123456", appSecret: "process-secret" }).then((result) => { assert.equal(result.status, 204); responseCompletedAt = result.completedAt; });
     }
   });
   const code = await new Promise<number | null>((resolve) => child.once("exit", resolve));
   assert.equal(code, 0); assert.equal(stderr, ""); assert.doesNotMatch(stdout, /process-secret/);
+  assert.ok(responseCompletedAt > 0 && Date.now() - responseCompletedAt < 500, "setup must exit promptly after /verify completes");
   const frames = stdout.trim().split("\n").map((line) => JSON.parse(line) as Record<string, unknown>);
   assert.equal(frames[0].type, "echowork.channel_setup.ready"); assert.equal(frames[1].type, "echowork.channel_setup.complete");
   const profileId = String(frames[1].profile_id);
@@ -53,7 +54,7 @@ test("CLI setup cancel endpoint terminates with a non-zero exit", async () => {
     const line = stdout.split("\n").find((entry) => entry.includes("channel_setup.ready"));
     if (line && !submitted) {
       submitted = true;
-      void post(new URL((JSON.parse(line) as { url: string }).url), {}, "cancel").then((status) => assert.equal(status, 204));
+      void post(new URL((JSON.parse(line) as { url: string }).url), {}, "cancel").then((result) => assert.equal(result.status, 204));
     }
   });
   const code = await new Promise<number | null>((resolve) => child.once("exit", resolve));
