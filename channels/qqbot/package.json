@@ -9,7 +9,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "npm run build && node --test dist/tests/*.test.js"
+    "test": "npm run build && node --test dist/tests/cli-process.test.js dist/tests/gateway-orchestrator.test.js dist/tests/media.test.js dist/tests/qq-core.test.js dist/tests/setup-profile.test.js"
   },
   "engines": { "node": ">=20" },
   "author": "EchoWorker",
