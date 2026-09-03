@@ -1,6 +1,6 @@
 # EchoAI QQ Bot Channel
 
-Connect EchoAI to QQ through the official QQ Bot API. Version 0.1.2 supports C2C private text/image messages and group text/image messages that explicitly mention the bot.
+Connect EchoAI to QQ through the official QQ Bot API. Version 0.1.3 supports C2C private text/image messages and group text/image messages that explicitly mention the bot.
 
 ## Setup
 
