@@ -20,7 +20,7 @@
     "build-registry": "node src/hubctl.js build-registry --production",
     "package:wechat": "node src/hubctl.js package wechat --target windows-x64 --bundle-runtime --fixture",
     "check": "npm run validate && npm run build-catalog",
-    "test": "node --test test/candidate.test.js test/catalog.test.js test/signing.test.js test/validation.test.js"
+    "test": "node --test test/candidate.test.js test/catalog.test.js test/package-layout.test.js test/signing.test.js test/validation.test.js"
   },
   "devDependencies": {
     "yauzl": "3.4.0",

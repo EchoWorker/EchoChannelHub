@@ -11,7 +11,7 @@ npm ci
 npm test
 npm run check
 node src/hubctl.js package wechat --target windows-x64 --bundle-runtime
-node src/hubctl.js verify artifacts/wechat-0.1.10-windows-x64.echochannel
+node src/hubctl.js verify artifacts/wechat-0.1.11-windows-x64.echochannel
 ```
 
-The package command emits one ZIP-format `.echochannel` with a root `manifest.json`, a signed sidecar, and a signed catalog. It refuses every other target and makes no production-signing claim.
+The package command emits one ZIP-format `.echochannel` with a root manifest v3 that launches `payload/runtime/node.exe` with `payload/app/dist/cli.js` as `entrypointArgs` (no `.cmd` shim), plus a signed sidecar. Production signing requires `CHANNEL_HUB_SIGNING_KEY`; `--fixture` uses the test-only key for local structural verification.

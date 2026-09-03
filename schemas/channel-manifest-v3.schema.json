@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/EchoWorker/EchoChannelHub/main/schemas/channel-manifest-v3.schema.json",
+  "title": "EchoWork channel_manager artifact manifest v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "publisher", "id", "version", "target", "entrypoint", "entrypointArgs", "protocols", "setup"],
+  "properties": {
+    "schemaVersion": { "const": 3 }, "publisher": { "type": "string", "minLength": 1 }, "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$" }, "target": { "const": "windows-x64" }, "entrypoint": { "$ref": "#/$defs/path" }, "entrypointArgs": { "$ref": "#/$defs/entrypointArgs" },
+    "protocols": { "type": "object", "additionalProperties": false, "required": ["setup", "start"], "properties": { "setup": { "const": 2 }, "start": { "const": 1 } } },
+    "setup": { "$ref": "#/$defs/setup" }
+  },
+  "$defs": {
+    "path": { "type": "string", "pattern": "^(?![./\\\\])(?![A-Za-z]:)(?!.*(?:^|[/\\\\])\\.{1,2}(?:[/\\\\]|$))[^{}\\u0000-\\u001F\\u007F-\\u009F]+$" }, "entrypointArgs": { "type": "array", "items": { "$ref": "#/$defs/entrypointArg" } }, "entrypointArg": { "$ref": "#/$defs/path" }, "args": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "mode": { "type": "object", "additionalProperties": false, "required": ["args"], "properties": { "args": { "$ref": "#/$defs/args" } } },
+    "setup": { "type": "object", "additionalProperties": false, "required": ["args", "add", "startArgs", "env"], "properties": {
+      "args": { "$ref": "#/$defs/args" }, "add": { "$ref": "#/$defs/mode" }, "restore": { "$ref": "#/$defs/mode" }, "startArgs": { "$ref": "#/$defs/args" }, "env": { "type": "object", "additionalProperties": { "type": "string" } }
+    } }
+  }
+}

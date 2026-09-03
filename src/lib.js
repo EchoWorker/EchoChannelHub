@@ -10,13 +10,19 @@ export const TARGET = "windows-x64";
 export const PUBLISHER = "EchoWorker";
 export { TEST_KEY_ID };
 export const readJson = file => JSON.parse(fs.readFileSync(file, "utf8"));
-export const slash = value => value.split(path.sep).join("/");
+export const slash = value => value.replaceAll("\\", "/");
 export const stableJson = value => `${JSON.stringify(value, null, 2)}\n`;
 export const sha256Bytes = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 export const sha256 = file => sha256Bytes(fs.readFileSync(file));
 export const sign = (bytes) => testSigner(bytes);
 export const verifySignature = (bytes, signature) => testVerifier(bytes, signature);
-const safeRelative = value => typeof value === "string" && value.length > 0 && !path.isAbsolute(value) && !value.split(/[\\/]/).includes("..");
+const hasControl = value => /[\u0000-\u001f\u007f-\u009f]/u.test(value);
+const isPortableAbsolute = value => /^[\\/]/.test(value) || /^[A-Za-z]:/.test(value);
+const hasDotSegment = value => value.split(/[\\/]/).some(segment => segment === "." || segment === "..");
+export const isPathLikeEntrypointArg = (value, index = 0) => index === 0 || (typeof value === "string" && (/[\\/]/.test(value) || isPortableAbsolute(value)));
+export const safeRelative = value => typeof value === "string" && value.length > 0 && !hasControl(value) && !isPortableAbsolute(value) && !hasDotSegment(value) && !/[{}]/.test(value);
+export const validEntrypointArg = value => typeof value === "string" && value.length > 0 && !hasControl(value) && !isPortableAbsolute(value) && !hasDotSegment(value) && !/[{}]/.test(value);
+export const safeArchivePath = value => safeRelative(value) && value.startsWith("payload/") && !value.includes("\\");
 const semver = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 const idPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const placeholders = value => [...value.matchAll(/\{([^{}]+)\}/g)].map(match => match[1]);
@@ -49,15 +55,16 @@ export function validateSetup(value, location = "setup") {
 }
 
 export function validateManifest(value, location = "manifest") {
-  const errors = [], allowed = new Set(["schemaVersion", "publisher", "id", "version", "target", "entrypoint", "protocols", "setup"]);
+  const errors = [], allowed = new Set(["schemaVersion", "publisher", "id", "version", "target", "entrypoint", "entrypointArgs", "protocols", "setup"]);
   if (!value || typeof value !== "object" || Array.isArray(value)) return [`${location}: must be an object`];
   for (const key of Object.keys(value)) if (!allowed.has(key)) errors.push(`${location}: unknown property ${key}`);
-  if (value.schemaVersion !== 2) errors.push(`${location}.schemaVersion: must equal 2`);
+  if (value.schemaVersion !== 3) errors.push(`${location}.schemaVersion: must equal 3`);
   if (typeof value.publisher !== "string" || !value.publisher) errors.push(`${location}.publisher: non-empty string required`);
   if (!idPattern.test(value.id ?? "")) errors.push(`${location}.id: invalid kebab-case id`);
   if (!semver.test(value.version ?? "")) errors.push(`${location}.version: invalid SemVer`);
   if (value.target !== TARGET) errors.push(`${location}.target: must equal ${TARGET}`);
   if (!safeRelative(value.entrypoint)) errors.push(`${location}.entrypoint: safe relative path required`);
+  if (!Array.isArray(value.entrypointArgs) || value.entrypointArgs.some((arg, index) => !validEntrypointArg(arg, index))) errors.push(`${location}.entrypointArgs: invalid argument or unsafe path`);
   if (!value.protocols || value.protocols.setup !== 2 || value.protocols.start !== 1 || Object.keys(value.protocols ?? {}).some(k => !["setup", "start"].includes(k))) errors.push(`${location}.protocols: setup must equal 2 and start must equal 1`);
   errors.push(...validateSetup(value.setup, `${location}.setup`));
   return errors;
@@ -70,7 +77,7 @@ export function loadChannels(base = root) {
     return { dir: channelDir, directoryName: e.name, manifestFile, manifest: readJson(manifestFile) };
   }).sort((a, b) => a.manifest.id.localeCompare(b.manifest.id));
 }
-export const artifactManifest = channel => ({ schemaVersion: 2, publisher: channel.publisher, id: channel.id, version: channel.version, target: TARGET, entrypoint: `payload/echo-${channel.id}.cmd`, protocols: { setup: 2, start: 1 }, setup: structuredClone(channel.setup) });
+export const artifactManifest = channel => ({ schemaVersion: 3, publisher: channel.publisher, id: channel.id, version: channel.version, target: TARGET, entrypoint: `payload/${slash(channel.entrypoint)}`, entrypointArgs: channel.entrypointArgs.map((arg, index) => isPathLikeEntrypointArg(arg, index) && safeRelative(arg) ? `payload/${slash(arg)}` : arg), protocols: { setup: 2, start: 1 }, setup: structuredClone(channel.setup) });
 
 export function validateRepository(base = root) {
   const errors = []; let channels = [];
@@ -78,11 +85,12 @@ export function validateRepository(base = root) {
   const ids = new Set();
   for (const channel of channels) {
     const m = channel.manifest, at = m.id ?? channel.directoryName;
-    const allowed = new Set(["$schema", "schemaVersion", "publisher", "id", "name", "version", "summary", "description", "aliases", "categoryIds", "tagIds", "license", "runtime", "runtimeLabel", "entrypoint", "target", "capabilities", "highlights", "publisherTrust", "setupMethod", "setup", "provenance"]);
+    const allowed = new Set(["$schema", "schemaVersion", "publisher", "id", "name", "version", "summary", "description", "aliases", "categoryIds", "tagIds", "license", "runtime", "runtimeLabel", "entrypoint", "entrypointArgs", "target", "capabilities", "highlights", "publisherTrust", "setupMethod", "setup", "provenance"]);
     for (const key of Object.keys(m)) if (!allowed.has(key)) errors.push(`${channel.manifestFile}: unknown property ${key}`);
-    if (m.schemaVersion !== 2 || m.publisher !== PUBLISHER || m.target !== TARGET || m.runtime !== "node") errors.push(`${at}: invalid schemaVersion, publisher, target, or runtime`);
+    if (m.schemaVersion !== 3 || m.publisher !== PUBLISHER || m.target !== TARGET || m.runtime !== "node") errors.push(`${at}: invalid schemaVersion, publisher, target, or runtime`);
     if (!idPattern.test(m.id ?? "") || !semver.test(m.version ?? "")) errors.push(`${channel.directoryName}: invalid id or version`);
     for (const key of ["license", "entrypoint", "provenance"]) if (typeof m[key] !== "string" || !m[key]) errors.push(`${at}.${key}: non-empty string required`);
+    if (!safeRelative(m.entrypoint) || !Array.isArray(m.entrypointArgs) || m.entrypointArgs.some((arg, index) => !validEntrypointArg(arg, index))) errors.push(`${at}: invalid entrypoint or entrypointArgs`);
     validateSemantics(m, at, errors);
     errors.push(...validateSetup(m.setup, `${at}.setup`));
     if (m.id !== channel.directoryName || ids.has(m.id)) errors.push(`${channel.manifestFile}: id mismatch or duplicate`); ids.add(m.id);
@@ -94,8 +102,14 @@ export function validateRepository(base = root) {
 }
 
 export function channelSemantic(m) { return { publisher: m.publisher, id: m.id, name: m.name, summary: m.summary, description: m.description, aliases: m.aliases, categoryIds: m.categoryIds, tagIds: m.tagIds, capabilities: m.capabilities, highlights: m.highlights, publisherTrust: m.publisherTrust, setupMethod: m.setupMethod, runtime: m.runtimeLabel }; }
+export const ECHOWORK_V3_MIN_VERSION = "0.3.110";
+export function hostSatisfiesMinimum(actual, minimum = ECHOWORK_V3_MIN_VERSION) {
+  const parse = value => { const match = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.exec(value); return match?.slice(1).map(Number); };
+  const a = parse(actual), b = parse(minimum); if (!a || !b) return false;
+  return a[0] !== b[0] ? a[0] > b[0] : a[1] !== b[1] ? a[1] > b[1] : a[2] >= b[2];
+}
 export function makeCatalog(channels, artifacts, { sequence = 1, generatedAt = "2026-01-01T00:00:00Z", expiresAt = "2036-01-01T00:00:00Z" } = {}) {
-  return { schemaVersion: 1, sequence, generatedAt, expiresAt, channels: channels.map(c => ({ ...channelSemantic(c.manifest), releases: [{ version: c.manifest.version, status: "active", engines: { echowork: ">=0.1.0" }, artifacts: { [TARGET]: artifacts[c.manifest.id] } }] })) };
+  return { schemaVersion: 1, sequence, generatedAt, expiresAt, channels: channels.map(c => ({ ...channelSemantic(c.manifest), releases: [{ version: c.manifest.version, status: "active", engines: { echowork: `>=${ECHOWORK_V3_MIN_VERSION}` }, artifacts: { [TARGET]: artifacts[c.manifest.id] } }] })) };
 }
 const exact = (o, keys, at, errors) => { if (!o || typeof o !== "object" || Array.isArray(o)) { errors.push(`${at}: object required`); return false; } for (const k of Object.keys(o)) if (!keys.includes(k)) errors.push(`${at}: unknown property ${k}`); for (const k of keys) if (!(k in o)) errors.push(`${at}: missing ${k}`); return true; };
 export function validateCatalog(value, location = "catalog") {

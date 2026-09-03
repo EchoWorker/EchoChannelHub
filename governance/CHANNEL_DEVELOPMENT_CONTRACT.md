@@ -28,9 +28,10 @@ channels/<id>/
 
 ## 2. `channel.json` 源元数据契约
 
-`channel.json` 必须以 `schemas/channel-source-v2.schema.json` 为 `$schema`，并满足以下规则：
+`channel.json` 必须以 `schemas/channel-source-v3.schema.json` 为 `$schema`，并满足以下规则：
 
-- 固定字段：`schemaVersion: 2`、`publisher: "EchoWorker"`、`runtime: "node"`、`target: "windows-x64"`。
+- 固定字段：`schemaVersion: 3`、`publisher: "EchoWorker"`、`runtime: "node"`、`target: "windows-x64"`。
+- `entrypoint` 是包内可执行文件的安全相对路径；`entrypointArgs` 是追加在其后的静态参数数组。Windows Node 包固定使用 `payload/runtime/node.exe` 与 `["payload/app/dist/cli.js"]`，不生成 `.cmd`。
 - `name`、`summary`、`description`、`runtimeLabel`、`setupMethod` 和每一条 `highlights` 都必须同时具备非空 `en`、`zh-CN`。
 - `categoryIds`、`tagIds`、`capabilities` 至少各有一项，必须来自 [`src/taxonomy.js`](../src/taxonomy.js) 定义的词表、不能重复且字典序排列；`aliases` 若存在也必须字典序排列。
 - `publisherTrust` 只能是 `official` 或 `community`；`entrypoint`、`provenance` 必须是非空、安全相对路径。
@@ -101,18 +102,19 @@ node src/hubctl.js verify artifacts/<id>-<version>-windows-x64.echochannel
 
 ```json
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "publisher": "EchoWorker",
   "id": "<id>",
   "version": "<version>",
   "target": "windows-x64",
-  "entrypoint": "payload/echo-<id>.cmd",
+  "entrypoint": "payload/runtime/node.exe",
+  "entrypointArgs": ["payload/app/dist/cli.js"],
   "protocols": { "setup": 2, "start": 1 },
   "setup": { "...": "从 channel.json 原样复制" }
 }
 ```
 
-payload 中的启动器调用 `payload/app/dist/cli.js`；使用 `--bundle-runtime` 时还会携带 `payload/runtime/node.exe`。打包会排除 `.git`、`node_modules`、`dist`、`artifacts` 后复制源码，再重新安装生产依赖并复制构建产物。artifact 旁的 `.json` sidecar 必须准确记录文件名、目标、大小、SHA-256、Base64 Ed25519 签名、keyId、testOnly；任何字节变化都需要重签。
+payload 中不生成命令脚本：`entrypoint` 直接指向 `payload/runtime/node.exe`，宿主把 `entrypointArgs` 中的 `payload/app/dist/cli.js` 置于 setup/start 参数之前。manifest v3 因而强制 `--bundle-runtime`。打包前还会直接执行构建后的 CLI `version --json`，并核对 publisher、id、version 与协议版本。打包会排除 `.git`、`node_modules`、`dist`、`artifacts`、测试目录和测试文件后复制源码，再重新安装生产依赖并复制构建产物。artifact 旁的 `.json` sidecar 必须准确记录文件名、目标、大小、SHA-256、Base64 Ed25519 签名、keyId、testOnly；任何字节变化都需要重签。
 
 不带 `--production` 的产物只能使用 `echoworker-test-2026` 测试密钥，且 `testOnly: true`，绝不能被生产 EchoWork 信任。正式包必须传 `--production`、提供 `CHANNEL_HUB_SIGNING_KEY`，使用 `echoworker-prod-2026`；私钥不得落盘或提交。
 

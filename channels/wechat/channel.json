@@ -1,13 +1,13 @@
 {
-  "$schema": "../../schemas/channel-source-v2.schema.json",
-  "schemaVersion": 2,
+  "$schema": "../../schemas/channel-source-v3.schema.json",
+  "schemaVersion": 3,
   "publisher": "EchoWorker",
   "id": "wechat",
   "name": {
     "en": "WeChat",
     "zh-CN": "微信"
   },
-  "version": "0.1.10",
+  "version": "0.1.11",
   "summary": {
     "en": "WeChat channel for EchoAI.",
     "zh-CN": "EchoAI 微信通道。"
@@ -34,7 +34,7 @@
     "en": "Bundled Node.js runtime",
     "zh-CN": "内置 Node.js 运行时"
   },
-  "entrypoint": "dist/cli.js",
+  "entrypoint": "runtime/node.exe",
   "target": "windows-x64",
   "capabilities": [
     "media",
@@ -84,5 +84,8 @@
     ],
     "env": {}
   },
-  "provenance": "MIGRATION.json"
+  "provenance": "MIGRATION.json",
+  "entrypointArgs": [
+    "app/dist/cli.js"
+  ]
 }
