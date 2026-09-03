@@ -17,9 +17,10 @@ test("latest resolves immutable semantic catalog and taxonomies", () => {
   assert.equal(value.latest.snapshot.size, value.snapshotBytes.length);
   assert.match(value.latest.snapshot.url, /snapshots\/sha256\/[a-f0-9]{64}\/snapshot\.json$/);
   assert.deepEqual(validateCatalog(value.objects.catalog), []);
-  assert.equal(value.objects.catalog.channels[0].description["zh-CN"].includes("微信"), true);
-  assert.equal("setup" in value.objects.catalog.channels[0], false);
-  assert.equal("setup" in value.objects.catalog.channels[0].releases[0], false);
+  const wechat = value.objects.catalog.channels.find(channel => channel.id === "wechat");
+  assert.equal(wechat.description["zh-CN"].includes("微信"), true);
+  assert.equal("setup" in wechat, false);
+  assert.equal("setup" in wechat.releases[0], false);
   assert.equal(value.objects.categories.categories[0].id, "messaging");
   assert.equal(value.objects.tags.tags[0].id, "direct-message");
   for (const [kind, ref] of Object.entries(value.snapshot.blobs)) {
